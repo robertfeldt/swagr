@@ -6,10 +6,7 @@ require 'fileutils'
 require 'wapp'
 
 SkeletonDir = "skeletons"
-
-# Default skeleton tarball is a vanilla Bootstrap web site template.
 DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
-
 SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
 
 class WappCommand < Thor
@@ -24,7 +21,7 @@ class WappCommand < Thor
   def create(dir)
     empty_directory dir
     public_dir = File.join(dir, "public")
-    directory "templates", public_dir
+    directory "templates", dir
     tarball = File.join(public_dir, "skeleton.zip")
     copy_file SkeletonTarball, tarball
     inside public_dir do
