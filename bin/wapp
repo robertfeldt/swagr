@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'thor'
+require 'wapp'
+
+class Wapp < Thor
+  def create(dir)
+    puts "Create code goes here!"
+  end
+end
+
+Wapp.start
