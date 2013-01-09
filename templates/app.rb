@@ -41,12 +41,12 @@ class WAppGuiServer < Sinatra::Base
   end
 
   def copyright_holders
-    "FIXME: Your Name"
+    "FIXME: Your Name(s)..."
   end
   
   # Set the first year you started working on this app. The copyright will then go from then to current year.
   def first_year
-    2013
+    2012
   end
 
   def year
