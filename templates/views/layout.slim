@@ -14,14 +14,13 @@ html
 
   body
 
-    = slim :navbar
-
     div class="container"
+      == slim :navbar
       == yield
 
     script src="http://code.jquery.com/jquery-latest.js"
     script src="js/bootstrap.min.js"
 
-    div id="footer"
-      = slim :footer
-      | Copyright © #{year} #{author}
+    div class="container"
+      div id="footer"
+        == slim :footer

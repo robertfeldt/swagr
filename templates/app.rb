@@ -39,9 +39,24 @@ class WAppGuiServer < Sinatra::Base
   get '/' do
     slim :index
   end
+
+  def copyright_holders
+    "FIXME: Your Name"
+  end
   
-  def year; 2012; end
-  def author; "FIXME: Your Name"; end
+  # Set the first year you started working on this app. The copyright will then go from then to current year.
+  def first_year
+    2013
+  end
+
+  def year
+    current_year = Time.now.year
+    if current_year != first_year
+      "#{first_year}-#{current_year}"
+    else
+      "#{first_year}"
+    end
+  end
 
 end
 
