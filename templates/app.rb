@@ -40,6 +40,9 @@ class WAppGuiServer < Sinatra::Base
     slim :index
   end
   
+  def year; 2012; end
+  def author; "FIXME: Your Name"; end
+
 end
 
 if __FILE__ == $0
