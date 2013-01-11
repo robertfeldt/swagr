@@ -3,13 +3,13 @@ require 'rubygems'
 require 'thor'
 require 'fileutils'
 
-require 'wapp'
+require 'swagr'
 
 SkeletonDir = "skeletons"
 DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
 SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
 
-class WappCommand < Thor
+class SwagrCommand < Thor
 
   include Thor::Actions
 
@@ -33,4 +33,4 @@ class WappCommand < Thor
 
 end
 
-WappCommand.start
+SwagrCommand.start

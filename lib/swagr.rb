@@ -1,5 +1,5 @@
-require "wapp/version"
+require "swagr/version"
 
-module Wapp
+module Swagr
   # Your code goes here...
 end
