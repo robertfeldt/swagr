@@ -4,12 +4,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'wapp/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "wapp"
-  gem.version       = Wapp::VERSION
+  gem.name          = "swagr"
+  gem.version       = Swagr::VERSION
   gem.authors       = ["Robert Feldt"]
   gem.email         = ["robert.feldt@gmail.com"]
-  gem.description   = %q{simple web app framework for creating GUI's to interact with long-running Ruby processes}
-  gem.summary       = %q{Simple, barebones web app skeleton creator based on Sinatra, Sass, Slim and Coffeescript. Geared to interfacing with long-running Ruby processes.}
+  gem.description   = %q{simple web app gui framework for ruby}
+  gem.summary       = %q{Simple, barebones web app gui framework for Ruby programs/processes. Based on Sinatra, Sass, Slim, Coffeescript and d3.js. Geared to interfacing with long-running Ruby processes.}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
