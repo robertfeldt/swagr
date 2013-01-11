@@ -18,9 +18,11 @@ html
       == slim :navbar
       == yield
 
-    script src="http://code.jquery.com/jquery-latest.js"
-    script src="js/bootstrap.min.js"
-
     div class="container"
       div id="footer"
         == slim :footer
+
+    script src="http://code.jquery.com/jquery-latest.js"
+    script src="js/bootstrap.min.js"
+    /! d3 Loaded last since large and can take considerable time to load...
+    script src="http://d3js.org/d3.v3.min.js"

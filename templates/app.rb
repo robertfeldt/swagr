@@ -3,6 +3,7 @@ require 'sinatra/base'
 require 'slim'
 require 'sass'
 require 'coffee-script'
+require 'json'
 
 class SassEngine < Sinatra::Base
   
@@ -23,6 +24,18 @@ class CoffeeEngine < Sinatra::Base
     coffee filename.to_sym
   end
   
+end
+
+# The data engine should return the json or csv formatted data
+# that is used in your app. You need to set this up to dynamically deliver the
+# latest data about your running Ruby app/process/server.
+class DataEngine < Sinatra::Base
+
+  # Example handler that returns a json data set that is used in default wapp templates.
+  get '/data/*' do
+    [1, 2, 4, 13, 7, 6, 9, 3].to_json
+  end
+
 end
 
 class WAppGuiServer < Sinatra::Base
