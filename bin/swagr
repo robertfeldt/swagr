@@ -9,6 +9,9 @@ SkeletonDir = "skeletons"
 DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
 SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
 
+StaticDir = PublicDir = "static"
+DefaultSubdirs = ["lib", "coffee", "sass", "views", StaticDir]
+
 class SwagrCommand < Thor
 
   include Thor::Actions
@@ -17,11 +20,32 @@ class SwagrCommand < Thor
     File.dirname(__FILE__).split("/")[0...-1].join("/")
   end
 
-  desc "create DIR", "Create a wapp in DIR"
-  def create(dir)
+  desc "update", "Update all templates by re-downloading the latest versions of needed libs"
+  def update
+    inside File.join("templates", PublicDir, "js") do
+      get "http://d3js.org/d3.v3.min.js"
+      get "http://coffeescript.org/extras/coffee-script.js"
+    end
+  end
+
+  #desc "run DIR", "Run a swagr app in DIR, only things that override the base app needs to be in DIR"
+  #def run(dir)
+  #end
+
+  desc "init DIR", "Create a skeleton structure in DIR for customizing a swagr app"
+  def init(dir)
     empty_directory dir
-    public_dir = File.join(dir, "public")
+    inside dir do
+      DefaultSubdirs.each {|subdir| empty_directory(subdir)}
+    end
+    # Now copy everything in the templates dir into the 
     directory "templates", dir
+  end
+
+  desc "create DIR", "Create/setup a swagr app in DIR"
+  def create(dir)
+    init(dir)
+    public_dir = File.join(dir, PublicDir)
     tarball = File.join(public_dir, "skeleton.zip")
     copy_file SkeletonTarball, tarball
     inside public_dir do
