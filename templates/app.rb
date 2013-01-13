@@ -26,13 +26,14 @@ class DataEngine < Sinatra::Base
     end
   end
 
+  helpers SendAsJson
+
   set :views,   File.dirname(__FILE__)    + '/data'
 
   # Example handler that returns a random json data set for all example requests...
   get %r{/data/randints/arrayofsize([\d]+).json} do |size|
-    content_type :json
     a = Array.new(size.to_i).map {-50+(100*rand()).to_i}
-    a.to_json
+    json_response a
   end
 
 end
