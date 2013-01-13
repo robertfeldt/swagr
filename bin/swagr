@@ -25,6 +25,7 @@ class SwagrCommand < Thor
     inside File.join("templates", PublicDir, "js") do
       get "http://d3js.org/d3.v3.min.js"
       get "http://coffeescript.org/extras/coffee-script.js"
+      get "http://code.jquery.com/jquery-latest.js"
     end
   end
 

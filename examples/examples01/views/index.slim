@@ -20,15 +20,18 @@ div class="container" id="d3b"
 script type="text/javascript"
   | var co = d3.select("#d3a");
     co.append("p").text("Hello, d3.js world!");
-    co.append("p").text("More d3.js awesomness coming right up...");
-    var dataset = [ -5, -2, 10, 20, 25 ];
-    d3.select("#d3b")
+    co.append("p").text("Now lets get some data from our Ruby back end and show them with d3");
+    var dataset2;
+    d3.json("/data/randints/arrayofsize5.json", function(error, json) {
+      dataset2 = json;
+      d3.select("#d3b")
         .selectAll("p")
-        .data(dataset)
+        .data(dataset2)
         .enter()
         .append("p")
         .style("color", function(d) { return ( (d < 0) ? "red" : "black" );})
         .text(function(d) { return d; });
+    });
 
 /! Example C: Coffee-script inline
 script src="js/coffee-script.js"
@@ -38,16 +41,20 @@ script type="text/coffeescript"
   | a = 1.5
     b = 2 + a
     str = "Hello, coffee-script and d3.js world! b = " + b + ". And now the same dataset from Coffee-script..."
-    console.log(str)
-    dataset = [ -5, -2, 10, 20, 25 ]
+    console.log(str)    
     d3.select("#d3_from_coffeescript_a").append("span").text(str)
-    d3.select("#d3_from_coffeescript_b")
-        .selectAll("p")
-        .data(dataset)
-        .enter()
-        .append("p")
-        .style((d) -> if (d<0) 
-            "red"
-          else
-            "black")
-        .text((d) -> d)
+    # Note that browsers have cached the request above so this will return the same json as above...
+    d3.json("/data/randints/arrayofsize5.json", (error, json) -> 
+      valueToColor = (d) ->
+        if (d < 0)
+          "red"
+        else
+          "black"
+      d3.select("#d3_from_coffeescript_b")
+          .selectAll("p")
+          .data(json)
+          .enter()
+          .append("p")
+          .style("color", valueToColor)
+          .text((d) -> d)
+    )

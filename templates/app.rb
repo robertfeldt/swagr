@@ -1,19 +1,8 @@
 require 'rubygems'
 require 'sinatra/base'
 require 'slim'
-require 'sass'
 require 'coffee-script'
 require 'json'
-
-class SassEngine < Sinatra::Base
-  
-  set :views,   File.dirname(__FILE__)    + '/sass'
-  
-  get '/sass/*.css' do
-    sass params[:splat].first.to_sym
-  end
-  
-end
 
 class CoffeeEngine < Sinatra::Base
   
@@ -30,10 +19,20 @@ end
 # that is used in your app. You need to set this up to dynamically deliver the
 # latest data about your running Ruby app/process/server.
 class DataEngine < Sinatra::Base
+  module SendAsJson
+    def json_response(data)
+      content_type :json
+      data.to_json
+    end
+  end
 
-  # Example handler that returns a json data set that is used in default wapp templates.
-  get '/data/*' do
-    [1, 2, 4, 13, 7, 6, 9, 3].to_json
+  set :views,   File.dirname(__FILE__)    + '/data'
+
+  # Example handler that returns a random json data set for all example requests...
+  get %r{/data/randints/arrayofsize([\d]+).json} do |size|
+    content_type :json
+    a = Array.new(size.to_i).map {-50+(100*rand()).to_i}
+    a.to_json
   end
 
 end
@@ -43,11 +42,16 @@ class WAppGuiServer < Sinatra::Base
   enable :logging
   disable :dump_errors
 
-  use SassEngine
+  use DataEngine
   use CoffeeEngine
 
   set :views,         File.dirname(__FILE__) + '/views'
   set :public_folder, File.dirname(__FILE__) + '/static'
+
+#  get '/example_data.json' do
+#    content_type :json
+#    [-1, 2, 4, -7, -9].to_json
+#  end
   
   get '/' do
     slim :index
