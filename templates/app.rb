@@ -3,6 +3,7 @@ require 'sinatra/base'
 require 'slim'
 require 'coffee-script'
 require 'json'
+require 'feldtruby'
 
 class CoffeeEngine < Sinatra::Base
   
@@ -28,12 +29,13 @@ class DataEngine < Sinatra::Base
 
   helpers SendAsJson
 
+  # Static data files are served from the "/data" dir
   set :views,   File.dirname(__FILE__)    + '/data'
 
   # Example handler that returns a random json data set for all example requests...
   get %r{/data/randints/arrayofsize([\d]+).json} do |size|
-    a = Array.new(size.to_i).map {-50+(100*rand()).to_i}
-    json_response a
+    a = Array.new(size.to_i).map {-5+(10*rand()).to_i}
+    json_response a.uniq.sort
   end
 
 end

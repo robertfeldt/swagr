@@ -3,7 +3,7 @@ h1 Hello, Swagr world!
 /! Example A: Some static svg
 div class="container"
   svg width="400" height="50"
-    text x="0" y="30" font-family="Helvetica" font-size="20" SVG is powerful:
+    text x="0" y="35" font-family="Helvetica" font-size="20" SVG:
     circle cx="175" cy="25" r="20" fill="rgba(128, 0, 128, 1.0)"
     circle cx="200" cy="25" r="20" fill="rgba(0, 0, 255, 0.75)"
     circle cx="225" cy="25" r="20" fill="rgba(0, 255, 0, 0.5)"
@@ -20,18 +20,79 @@ div class="container" id="d3b"
 script type="text/javascript"
   | var co = d3.select("#d3a");
     co.append("p").text("Hello, d3.js world!");
-    co.append("p").text("Now lets get some data from our Ruby back end and show them with d3");
-    var dataset2;
-    d3.json("/data/randints/arrayofsize5.json", function(error, json) {
-      dataset2 = json;
-      d3.select("#d3b")
-        .selectAll("p")
-        .data(dataset2)
-        .enter()
-        .append("p")
-        .style("color", function(d) { return ( (d < 0) ? "red" : "black" );})
-        .text(function(d) { return d; });
-    });
+    co.append("p").text("Now lets continuously get data from our Ruby back end and show them with d3");
+
+    var values =  [0];
+
+    var update_values = function() {
+      d3.json("/data/randints/arrayofsize5.json", function(error, json) {
+        values = json;
+      });
+    };
+
+    update_values();
+
+    var width = 600,
+        height = 120,
+        update_interval = 1.8;
+    
+    var svg = d3.select("#d3b").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+      .append("g")
+        .attr("transform", "translate(16," + (height / 2) + ")");
+    
+    var update_display = function(values) {
+      var xmapper = function(d, i) {return (i) * 70; },
+          transition_time = 600,
+          move_distance = (height*0.8)/2;
+
+      // DATA JOIN
+      // Join new data with old elements, if any.
+      var text = svg.selectAll("text")
+          .data(values, function(d) { return d; });
+    
+      // UPDATE
+      // Update old elements as needed.
+      text.attr("class", "update")
+        .transition()
+          .duration(transition_time)
+          .attr("x", xmapper);
+    
+      // ENTER
+      // Create new elements as needed.
+      text.enter().append("text")
+          .attr("class", "enter")
+          .attr("dy", ".35em")
+          .attr("y", -move_distance)
+          .attr("x", xmapper)
+          .style("fill-opacity", 1e-6)
+          .text(function(d) { return d + ","; })
+        .transition()
+          .duration(transition_time)
+          .attr("y", 0)
+          .style("fill-opacity", 1);
+    
+      // EXIT
+      // Remove old elements as needed.
+      text.exit()
+          .attr("class", "exit")
+        .transition()
+          .duration(transition_time)
+          .attr("y", move_distance)
+          .style("fill-opacity", 1e-6)
+          .remove();
+    };
+
+    // Get initial data and update display.
+    update_values();
+    update_display(values);
+    
+    // Repeatedly get new data and update display.
+    setInterval(function() {
+      update_values();
+      update_display(values);
+    }, update_interval * 1000);
 
 /! Example C: Coffee-script inline
 script src="js/coffee-script.js"
@@ -43,18 +104,59 @@ script type="text/coffeescript"
     str = "Hello, coffee-script and d3.js world! b = " + b + ". And now the same dataset from Coffee-script..."
     console.log(str)    
     d3.select("#d3_from_coffeescript_a").append("span").text(str)
-    # Note that browsers have cached the request above so this will return the same json as above...
-    d3.json("/data/randints/arrayofsize5.json", (error, json) -> 
-      valueToColor = (d) ->
-        if (d < 0)
-          "red"
-        else
-          "black"
-      d3.select("#d3_from_coffeescript_b")
-          .selectAll("p")
-          .data(json)
-          .enter()
-          .append("p")
-          .style("color", valueToColor)
-          .text((d) -> d)
-    )
+
+    # Options
+    width = 600
+    height = 120
+    move_distance = (height*0.8)/2
+    update_interval = 1.75        # seconds
+    xmapper = (d, i) -> i * 70
+    txtmapper = (d, i) -> d + ","
+    transition_time = 600         # milliseconds
+    
+    svg = d3.select("#d3_from_coffeescript_b").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+      .append("g")
+        .attr("transform", "translate(16," + (height / 2) + ")");
+    
+    update_display = () ->
+      d3.json("/data/randints/arrayofsize5.json", (error, data) ->   
+        # DATA JOIN - Join new data with old elements, if any.
+        text = svg.selectAll("text")
+            .data(data, (d) -> d)
+      
+        # UPDATE - Update old elements as needed.
+        text.attr("class", "update")
+          .transition()
+            .duration(transition_time)
+            .attr("x", xmapper)
+      
+        # ENTER - Create new elements as needed.
+        text.enter().append("text")
+            .attr("class", "enter")
+            .attr("dy", ".35em")
+            .attr("y", -move_distance)
+            .attr("x", xmapper)
+            .style("fill-opacity", 1e-6)
+            .text(txtmapper)
+          .transition()
+            .duration(transition_time)
+            .attr("y", 0)
+            .style("fill-opacity", 1)
+      
+        # EXIT - Remove old elements as needed.
+        text.exit()
+            .attr("class", "exit")
+          .transition()
+            .duration(transition_time)
+            .attr("y", move_distance)
+            .style("fill-opacity", 1e-6)
+            .remove()
+      )
+
+    # Get initial data and update display.
+    update_display()
+
+    # Repeatedly get new data and update display.
+    setInterval(update_display, update_interval*1000)
