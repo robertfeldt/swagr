@@ -1,12 +1,5 @@
 h1 Hello, Swagr world!
 
-/! Example A: Using d3 to add elements dynamically
-div class="container" id="d3_1"
-script src="js/d3.v3.min.js"
-script type="text/javascript"
-  | d3.select("#d3_1").append("span")
-      .text("Hello, d3.js world!");
-
 /! Example A: Some static svg
 div class="container"
   svg width="400" height="50"
@@ -20,12 +13,41 @@ div class="container"
     /! ellipse cx="150" cy="80" rx="50" ry="25" fill="red"
     /! line x1="0" y1="0" x2="300" y2="50" stroke="black"
 
+/! Example B: Using d3 to add elements dynamically
+script src="js/d3.v3.min.js"
+div class="container" id="d3a"
+div class="container" id="d3b"
+script type="text/javascript"
+  | var co = d3.select("#d3a");
+    co.append("p").text("Hello, d3.js world!");
+    co.append("p").text("More d3.js awesomness coming right up...");
+    var dataset = [ -5, -2, 10, 20, 25 ];
+    d3.select("#d3b")
+        .selectAll("p")
+        .data(dataset)
+        .enter()
+        .append("p")
+        .style("color", function(d) { return ( (d < 0) ? "red" : "black" );})
+        .text(function(d) { return d; });
+
 /! Example C: Coffee-script inline
 script src="js/coffee-script.js"
-div class="container" id="d3_from_coffeescript"
+div class="container" id="d3_from_coffeescript_a"
+div class="container" id="d3_from_coffeescript_b"
 script type="text/coffeescript"
   | a = 1.5
     b = 2 + a
-    str = "Hello, coffee-script and d3.js world! b = " + b
+    str = "Hello, coffee-script and d3.js world! b = " + b + ". And now the same dataset from Coffee-script..."
     console.log(str)
-    d3.select("#d3_from_coffeescript").append("span").text(str)
+    dataset = [ -5, -2, 10, 20, 25 ]
+    d3.select("#d3_from_coffeescript_a").append("span").text(str)
+    d3.select("#d3_from_coffeescript_b")
+        .selectAll("p")
+        .data(dataset)
+        .enter()
+        .append("p")
+        .style((d) -> if (d<0) 
+            "red"
+          else
+            "black")
+        .text((d) -> d)

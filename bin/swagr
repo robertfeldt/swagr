@@ -10,7 +10,7 @@ DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
 SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
 
 StaticDir = PublicDir = "static"
-DefaultSubdirs = ["lib", "coffee", "sass", "views", StaticDir]
+DefaultSubdirs = ["coffee", "views", StaticDir]
 
 class SwagrCommand < Thor
 
