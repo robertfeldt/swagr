@@ -20,84 +20,12 @@ div class="container" id="d3b"
 script type="text/javascript"
   | var co = d3.select("#d3a");
     co.append("p").text("Hello, d3.js world!");
-    co.append("p").text("Now lets continuously get data from our Ruby back end and show them with d3");
-
-    var values =  [0];
-
-    var update_values = function() {
-      d3.json("/data/randints/arrayofsize5.json", function(error, json) {
-        values = json;
-      });
-    };
-
-    update_values();
-
-    var width = 600,
-        height = 120,
-        update_interval = 1.8;
-    
-    var svg = d3.select("#d3b").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-      .append("g")
-        .attr("transform", "translate(16," + (height / 2) + ")");
-    
-    var update_display = function(values) {
-      var xmapper = function(d, i) {return (i) * 70; },
-          transition_time = 600,
-          move_distance = (height*0.8)/2;
-
-      // DATA JOIN
-      // Join new data with old elements, if any.
-      var text = svg.selectAll("text")
-          .data(values, function(d) { return d; });
-    
-      // UPDATE
-      // Update old elements as needed.
-      text.attr("class", "update")
-        .transition()
-          .duration(transition_time)
-          .attr("x", xmapper);
-    
-      // ENTER
-      // Create new elements as needed.
-      text.enter().append("text")
-          .attr("class", "enter")
-          .attr("dy", ".35em")
-          .attr("y", -move_distance)
-          .attr("x", xmapper)
-          .style("fill-opacity", 1e-6)
-          .text(function(d) { return d + ","; })
-        .transition()
-          .duration(transition_time)
-          .attr("y", 0)
-          .style("fill-opacity", 1);
-    
-      // EXIT
-      // Remove old elements as needed.
-      text.exit()
-          .attr("class", "exit")
-        .transition()
-          .duration(transition_time)
-          .attr("y", move_distance)
-          .style("fill-opacity", 1e-6)
-          .remove();
-    };
-
-    // Get initial data and update display.
-    update_values();
-    update_display(values);
-    
-    // Repeatedly get new data and update display.
-    setInterval(function() {
-      update_values();
-      update_display(values);
-    }, update_interval * 1000);
 
 /! Example C: Coffee-script inline
 script src="js/coffee-script.js"
 div class="container" id="d3_from_coffeescript_a"
 div class="container" id="d3_from_coffeescript_b"
+/!script src="coffee/d3graph.js"
 script type="text/coffeescript"
   | a = 1.5
     b = 2 + a
@@ -105,58 +33,97 @@ script type="text/coffeescript"
     console.log(str)    
     d3.select("#d3_from_coffeescript_a").append("span").text(str)
 
-    # Options
-    width = 600
-    height = 120
-    move_distance = (height*0.8)/2
-    update_interval = 1.75        # seconds
-    xmapper = (d, i) -> i * 70
-    txtmapper = (d, i) -> d + ","
-    transition_time = 600         # milliseconds
-    
-    svg = d3.select("#d3_from_coffeescript_b").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-      .append("g")
-        .attr("transform", "translate(16," + (height / 2) + ")");
-    
-    update_display = () ->
-      d3.json("/data/randints/arrayofsize5.json", (error, data) ->   
-        # DATA JOIN - Join new data with old elements, if any.
-        text = svg.selectAll("text")
-            .data(data, (d) -> d)
-      
-        # UPDATE - Update old elements as needed.
-        text.attr("class", "update")
-          .transition()
-            .duration(transition_time)
-            .attr("x", xmapper)
-      
-        # ENTER - Create new elements as needed.
-        text.enter().append("text")
+    root = exports ? window
+
+    class D3Graph
+      default_options =
+        width:                  960
+        height:                 500
+        transition_y_distance:  50
+        update_interval:        1.75              # seconds
+        xmapper:                (d, i) -> i * 70
+        txtmapper:              (d, i) -> d
+        transition_time:        600               # milliseconds
+
+      constructor: (@selector, @dataUrl, opts = {}) ->
+        @opts = @set_default_options_unless_given(opts, default_options)
+        @_append_svg()
+        @update()     # First update so we have something to show...
+
+      set_default_options_unless_given: (givenOpts, defaultOpts) ->
+        for own option, value of defaultOpts
+          givenOpts[option] = value unless givenOpts.hasOwnProperty(option)
+        givenOpts
+
+      # Append the svg to the top-level selector
+      _append_svg: () ->
+        @svg = d3.select(@selector).append("svg")
+                    .attr("width", @opts.width)
+                    .attr("height", @opts.height)
+                  .append("g")
+                    .attr("transform", @_transform_string())
+
+      # Start updating the graph
+      start_updates: ->
+        @interval_id = root.setInterval ( => @update() ), @opts.update_interval*1000
+
+      # Stop updating the graph
+      stop_updates: -> root.clearInterval(@interval_id)
+
+      # Run the updates for a given number of seconds
+      run_updates_for: (seconds) ->
+        @start_updates()
+        setTimeout ( => @stop_updates(); console.log("Stopped updating graph!"); ), seconds*1000
+
+      update: ->
+        d3.json(@dataUrl, (error, data) =>
+          # D3's general update pattern:
+          # 1. DATA JOIN - Join new data with old elements, if any, then update, enter and exit below.
+          @elems = @_join_data(data)
+          # 2. UPDATE - Update existing elements as needed.
+          @_update_existing_elements()
+          # 3. ENTER - Create new elements as needed.
+          @_enter_new_elements()
+          # 4. EXIT - Remove old elements as needed.
+          @_remove_exiting_elements()
+        )
+
+    class TextArrayGraph extends D3Graph
+      _transform_string: -> "translate(16," + (@opts.height / 2) + ")"
+
+      _join_data: (data) -> @svg.selectAll("text").data(data, (d) -> d)
+
+      _update_existing_elements: (text) ->
+        @elems.attr("class", "update")
+            .transition()
+            .duration(@opts.transition_time)
+            .attr("x", @opts.xmapper)
+
+      _enter_new_elements: (text) ->
+        @elems.enter().append("text")
             .attr("class", "enter")
             .attr("dy", ".35em")
-            .attr("y", -move_distance)
-            .attr("x", xmapper)
+            .attr("y", -@opts.transition_y_distance)
+            .attr("x", @opts.xmapper)
             .style("fill-opacity", 1e-6)
-            .text(txtmapper)
-          .transition()
-            .duration(transition_time)
+            .text(@opts.txtmapper)
+            .transition()
+            .duration(@opts.transition_time)
             .attr("y", 0)
             .style("fill-opacity", 1)
-      
-        # EXIT - Remove old elements as needed.
-        text.exit()
+
+      _remove_exiting_elements: (text) ->
+        @elems.exit()
             .attr("class", "exit")
-          .transition()
-            .duration(transition_time)
-            .attr("y", move_distance)
+            .transition()
+            .duration(@opts.transition_time)
+            .attr("y", @opts.transition_y_distance)
             .style("fill-opacity", 1e-6)
             .remove()
-      )
 
-    # Get initial data and update display.
-    update_display()
-
-    # Repeatedly get new data and update display.
-    setInterval(update_display, update_interval*1000)
+    g = new TextArrayGraph "#d3_from_coffeescript_b", "/data/randints/arrayofsize5.json", {
+      width:      500
+      height:     120
+      txtmapper:  (d, i) -> d + ","
+    }
+    g.run_updates_for(10)
