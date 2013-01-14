@@ -1,4 +1,4 @@
-# Wapp
+# Swagr
 
 Simple web app skeleton creator for Ruby based on Sinatra, Slim, Coffeescript and d3.
 
