@@ -4,17 +4,17 @@ Simple web app skeleton creator for Ruby based on Sinatra, Slim, Coffeescript an
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Install yourself as:
+
+    $ gem install swagr
+
+or add this line to your application's Gemfile:
 
     gem 'swagr'
 
 And then execute:
 
     $ bundle
-
-Or install it yourself as:
-
-    $ gem install swagr
 
 ## Usage
 
