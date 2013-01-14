@@ -21,109 +21,22 @@ script type="text/javascript"
   | var co = d3.select("#d3a");
     co.append("p").text("Hello, d3.js world!");
 
-/! Example C: Coffee-script inline
+/! Example C: Coffee-script inline and importing from other files
 script src="js/coffee-script.js"
-div class="container" id="d3_from_coffeescript_a"
-div class="container" id="d3_from_coffeescript_b"
-/!script src="coffee/d3graph.js"
+script src="coffee/d3graph.js"
+script src="coffee/updating_text_graph.js"
+div class="container" id="d3_from_coffeescript"
+div class="container" id="updating_text"
 script type="text/coffeescript"
   | a = 1.5
     b = 2 + a
-    str = "Hello, coffee-script and d3.js world! b = " + b + ". And now the same dataset from Coffee-script..."
+    str = "Hello, coffee-script and d3.js world! b = " + b + ". And now an updating text graph from Coffee-script..."
     console.log(str)    
-    d3.select("#d3_from_coffeescript_a").append("span").text(str)
-
+    d3.select("#d3_from_coffeescript").append("span").text(str)
     root = exports ? window
-
-    class D3Graph
-      default_options =
-        width:                  960
-        height:                 500
-        transition_y_distance:  50
-        update_interval:        1.75              # seconds
-        xmapper:                (d, i) -> i * 70
-        txtmapper:              (d, i) -> d
-        transition_time:        600               # milliseconds
-
-      constructor: (@selector, @dataUrl, opts = {}) ->
-        @opts = @set_default_options_unless_given(opts, default_options)
-        @_append_svg()
-        @update()     # First update so we have something to show...
-
-      set_default_options_unless_given: (givenOpts, defaultOpts) ->
-        for own option, value of defaultOpts
-          givenOpts[option] = value unless givenOpts.hasOwnProperty(option)
-        givenOpts
-
-      # Append the svg to the top-level selector
-      _append_svg: () ->
-        @svg = d3.select(@selector).append("svg")
-                    .attr("width", @opts.width)
-                    .attr("height", @opts.height)
-                  .append("g")
-                    .attr("transform", @_transform_string())
-
-      # Start updating the graph
-      start_updates: ->
-        @interval_id = root.setInterval ( => @update() ), @opts.update_interval*1000
-
-      # Stop updating the graph
-      stop_updates: -> root.clearInterval(@interval_id)
-
-      # Run the updates for a given number of seconds
-      run_updates_for: (seconds) ->
-        @start_updates()
-        setTimeout ( => @stop_updates(); console.log("Stopped updating graph!"); ), seconds*1000
-
-      update: ->
-        d3.json(@dataUrl, (error, data) =>
-          # D3's general update pattern:
-          # 1. DATA JOIN - Join new data with old elements, if any, then update, enter and exit below.
-          @elems = @_join_data(data)
-          # 2. UPDATE - Update existing elements as needed.
-          @_update_existing_elements()
-          # 3. ENTER - Create new elements as needed.
-          @_enter_new_elements()
-          # 4. EXIT - Remove old elements as needed.
-          @_remove_exiting_elements()
-        )
-
-    class TextArrayGraph extends D3Graph
-      _transform_string: -> "translate(16," + (@opts.height / 2) + ")"
-
-      _join_data: (data) -> @svg.selectAll("text").data(data, (d) -> d)
-
-      _update_existing_elements: (text) ->
-        @elems.attr("class", "update")
-            .transition()
-            .duration(@opts.transition_time)
-            .attr("x", @opts.xmapper)
-
-      _enter_new_elements: (text) ->
-        @elems.enter().append("text")
-            .attr("class", "enter")
-            .attr("dy", ".35em")
-            .attr("y", -@opts.transition_y_distance)
-            .attr("x", @opts.xmapper)
-            .style("fill-opacity", 1e-6)
-            .text(@opts.txtmapper)
-            .transition()
-            .duration(@opts.transition_time)
-            .attr("y", 0)
-            .style("fill-opacity", 1)
-
-      _remove_exiting_elements: (text) ->
-        @elems.exit()
-            .attr("class", "exit")
-            .transition()
-            .duration(@opts.transition_time)
-            .attr("y", @opts.transition_y_distance)
-            .style("fill-opacity", 1e-6)
-            .remove()
-
-    g = new TextArrayGraph "#d3_from_coffeescript_b", "/data/randints/arrayofsize5.json", {
+    g = new root.Swagr.UpdatingTextGraph "#updating_text", "/data/randints/arrayofsize6.json", {
       width:      500
       height:     120
-      txtmapper:  (d, i) -> d + ","
     }
-    g.run_updates_for(10)
+    #g.run_updates_for(5)
+    g.start_updates()

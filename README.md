@@ -1,12 +1,12 @@
 # Wapp
 
-Simple, barebones web app skeleton creator based on Sinatra, Sass, Slim and Coffeescript.
+Simple web app skeleton creator for Ruby based on Sinatra, Slim, Coffeescript and d3.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'wapp'
+    gem 'swagr'
 
 And then execute:
 
@@ -14,20 +14,12 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install wapp
+    $ gem install swagr
 
 ## Usage
 
-Create a new Wapp web app in the directory <dir>:
+Create a new Swagr web app in the directory <dir>:
 
-    wapp create <dir>
+    swagr create <dir>
 
-and then you can add/removed/modify slim files in <dir>/views, sass files in <dir>/css and coffescript files in <dir>/coffee.
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+and then you can add/removed/modify slim files in <dir>/views and coffescript files in <dir>/coffee. The standard setup includes simple examples of how to get basic communication from the Ruby program into the web app gui and how to update d3 graph components based on changes.
