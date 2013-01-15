@@ -2,7 +2,7 @@ require 'json'
 
 # Our dummy long-running ruby process is a Brownian motion where
 # we are interested in the max x and y values found. Our GUI
-# will present a top list of the top 3 results found so far.
+# will present a top list of the top results found so far.
 class BrownianMotion2DSearch
   Pos = Struct.new("Pos", :x, :y, :number)
   class Pos
