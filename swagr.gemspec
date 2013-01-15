@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["robert.feldt@gmail.com"]
   gem.description   = %q{simple web app gui framework for ruby}
   gem.summary       = %q{Simple, barebones web app gui framework for Ruby programs/processes. Based on Sinatra, Sass, Slim, Coffeescript and d3.js. Geared to interfacing with long-running Ruby processes.}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/robertfeldt/swagr"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
