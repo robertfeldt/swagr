@@ -18,8 +18,16 @@ And then execute:
 
 ## Usage
 
-Create a new Swagr web app in the directory <dir>:
+Create a new Swagr web app:
 
     swagr create <dir>
 
-and then you can add/removed/modify slim files in <dir>/views and coffescript files in <dir>/coffee. The standard setup includes simple examples of how to get basic communication from the Ruby program into the web app gui and how to update d3 graph components based on changes.
+and then start the web app with:
+
+    ruby <dir>/app.rb
+
+and then access your web app by opening the browser and going to 0.0.0.0:4000. The default web app has a few simple examples of how to transfer data from a back-end, long-running Ruby computation and display it with a small amount of Coffeescript code that uses d3 to visualise progress. Very rudimentary for now.
+
+After you have checked the default example you can add/removed/modify slim files in <dir>/views and coffescript files in <dir>/coffee and add your own backend and access it from app.rb.
+
+NOTE! This is very early times and most things in Swagr are likely to change. There is no real "design" yet, I needed to get something up and running quickly.
