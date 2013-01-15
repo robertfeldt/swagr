@@ -21,6 +21,10 @@ class CoffeeEngine < Sinatra::Base
   
 end
 
+require File.join(".", File.dirname(__FILE__), "brownian_searcher")
+BrownianSearcher = BrownianMotion2DSearch.new(5, 2.0)
+Thread.new {BrownianSearcher.start_search}
+
 # The data engine should return the json or csv formatted data
 # that is used in your app. You need to set this up to dynamically deliver the
 # latest data about your running Ruby app/process/server.
@@ -40,7 +44,17 @@ class DataEngine < Sinatra::Base
   # Example handler that returns a random json data set for all example requests...
   get %r{/data/randints/arrayofsize([\d]+).json} do |size|
     a = Array.new(size.to_i).map {-5+(10*rand()).to_i}
-    json_response a.uniq.sort
+    #json_response a.uniq.sort
+    b = a.uniq.sort.map {|v| {"value" => v}}
+    json_response b
+  end
+
+  get '/data/brownian_search/search_info.json' do
+    json_response BrownianSearcher.search_info
+  end
+
+  get '/data/brownian_search/current_position.json' do
+    json_response [BrownianSearcher.pos]
   end
 
 end

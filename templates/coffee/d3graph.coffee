@@ -4,13 +4,14 @@ class root.Swagr.D3Graph
   default_options =
     width:                  960
     height:                 500
-    transition_y_distance:  50
-    update_interval:        1.75              # seconds
-    transition_time:        600               # milliseconds
+    update_interval:        1.5               # seconds
+    transition_y:           50
+    transition_x:           50
+    transition_time:        750               # milliseconds
 
   constructor: (@selector, @dataUrl, opts = {}) ->
     @opts = @set_default_options_unless_given(opts, default_options)
-    @_append_svg()
+    @_append_elements()
     @update()     # First update so we have something to show...
 
   set_default_options_unless_given: (givenOpts, defaultOpts) ->
@@ -19,7 +20,7 @@ class root.Swagr.D3Graph
     givenOpts
 
   # Append the svg to the top-level selector
-  _append_svg: () ->
+  _append_elements: () ->
     @svg = d3.select(@selector).append("svg")
                 .attr("width", @opts.width)
                 .attr("height", @opts.height)

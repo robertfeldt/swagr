@@ -25,8 +25,12 @@ script type="text/javascript"
 script src="js/coffee-script.js"
 script src="coffee/d3graph.js"
 script src="coffee/updating_text_graph.js"
+script src="coffee/updating_top_list.js"
 div class="container" id="d3_from_coffeescript"
 div class="container" id="updating_text"
+div class="container" id="top_list_header"
+  text class="update"
+div class="container" id="top_list"
 script type="text/coffeescript"
   | a = 1.5
     b = 2 + a
@@ -34,9 +38,43 @@ script type="text/coffeescript"
     console.log(str)    
     d3.select("#d3_from_coffeescript").append("span").text(str)
     root = exports ? window
+
+    # 1. Updating row of random int values
     g = new root.Swagr.UpdatingTextGraph "#updating_text", "/data/randints/arrayofsize6.json", {
       width:      500
       height:     120
     }
-    #g.run_updates_for(5)
-    g.start_updates()
+    g.run_updates_for(5)
+    #g.start_updates()
+
+
+    # 2. Updating top list of positions found by BrownianSearcher
+
+    class MyUpdatingTopList extends root.Swagr.UpdatingToplist
+      _join_data: (data) ->
+        @svg.selectAll("text").data(data.top_list, (d, i) -> d.number)
+
+      textmapper: (elems, data) -> (d,i) -> 
+        (i+1).toString() + ". dist: " + d.distance.toFixed(2) + 
+          " pos: (" + d.x + ", " + d.y + ")" +
+          " step: " + d.number
+
+    g2 = new MyUpdatingTopList "#top_list", "/data/brownian_search/search_info.json", {
+      width:            500
+      height:           160
+      transition_y:     100
+      update_interval:  3.0
+      transition_time:  1000
+    }
+    #g2.run_updates_for(20)
+    g2.start_updates()
+
+    # 3. Header for the top list, showing current number of steps.
+    update_header = () ->
+      d3.json("/data/brownian_search/current_position.json", (error, data) ->
+        pos_str = "(" + data[0].x + ", " + data[0].y + ")"
+        d3.select("#top_list_header").select("text")
+          .text("Top 5 positions at step: " + data[0].number + ", pos: " + pos_str)
+      )
+    update_header()
+    setInterval(update_header, g2.opts.update_interval * 1000)
