@@ -13,11 +13,6 @@ class CoffeeEngine < Sinatra::Base
     filename = params[:splat].first
     coffee filename.to_sym
   end
-
-  get "/js/*.coffee" do
-    filename = params[:splat].first
-    coffee filename.to_sym
-  end
   
 end
 
@@ -54,7 +49,7 @@ class DataEngine < Sinatra::Base
   end
 
   get '/data/brownian_search/current_position.json' do
-    json_response [BrownianSearcher.pos]
+    json_response BrownianSearcher.pos
   end
 
 end

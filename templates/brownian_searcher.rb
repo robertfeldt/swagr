@@ -1,10 +1,11 @@
 require 'json'
 
 # Our dummy long-running ruby process is a Brownian motion where
-# we are interested in the max x and y values found. Our GUI
-# will present a top list of the top results found so far.
+# we are interested in the max distance from origo (0,0) that has been visited/found.
+# Our GUI will present a top list of the top results found so far.
 class BrownianMotion2DSearch
-  Pos = Struct.new("Pos", :x, :y, :number)
+  # A position is an integer point in 2D space.
+  Pos = Struct.new("Pos", :x, :y, :id)
   class Pos
     Origo = Pos.new(0,0,-1)
 
@@ -16,7 +17,7 @@ class BrownianMotion2DSearch
       {
         'x' => x,
         'y' => y,
-        'number' => number,
+        'id' => id,
         'distance' => self.distance_to(Origo)
       }.to_json(*a)
     end
@@ -26,8 +27,8 @@ class BrownianMotion2DSearch
 
   def initialize(maxToplistLength = 10, maxSleepSeconds = 2.0)
     @max_top_list_length = maxToplistLength
-    @num_steps = 0
     @max_sleep_seconds = maxSleepSeconds
+    @num_steps = 0
     @pos = new_pos(0, 0)
     @top_list = [@pos]
   end
@@ -67,9 +68,9 @@ class BrownianMotion2DSearch
   end
 
   def sort_top_list
-    # Add a small value based on when the position was found => older positions with same distance
+    # Add a small value based on when the position was found (here: id) => older positions with same distance
     # are ranked higher than later found positions with same distance.
-    @top_list = @top_list.sort_by {|p| -p.distance_to(Pos::Origo)+(p.number/(1000.0*@num_steps))}
+    @top_list = @top_list.sort_by {|p| -p.distance_to(Pos::Origo)+(p.id/(1000.0*@num_steps))}
   end
 
   def limit_top_list_length

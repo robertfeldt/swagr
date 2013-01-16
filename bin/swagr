@@ -5,6 +5,8 @@ require 'fileutils'
 
 require 'swagr'
 
+SwagrSourceRoot = File.dirname(__FILE__).split("/")[0...-1].join("/")
+
 SkeletonDir = "skeletons"
 DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
 SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
@@ -17,23 +19,19 @@ class SwagrCommand < Thor
   include Thor::Actions
 
   def self.source_root
-    File.dirname(__FILE__).split("/")[0...-1].join("/")
+    SwagrSourceRoot
   end
 
-  desc "update", "Update all templates by re-downloading the latest versions of needed libs"
-  def update
-    inside File.join("templates", PublicDir, "js") do
+  desc "upgrade", "Upgrade used libs by re-downloading the latest versions of needed libs. Might brake some of your code so use with caution."
+  def upgrade
+    inside File.join(SwagrSourceRoot, "templates", PublicDir, "js") do
       get "http://d3js.org/d3.v3.min.js"
       get "http://coffeescript.org/extras/coffee-script.js"
       get "http://code.jquery.com/jquery-latest.js"
     end
   end
 
-  #desc "run DIR", "Run a swagr app in DIR, only things that override the base app needs to be in DIR"
-  #def run(dir)
-  #end
-
-  desc "init DIR", "Create a skeleton structure in DIR for customizing a swagr app"
+  desc "init DIR", "Create (or update) a skeleton structure in DIR for customizing a swagr app. You should carefully review and answer the question it poses if you have updated any of the standard files. If not you risk losing your changes."
   def init(dir)
     empty_directory dir
     inside dir do

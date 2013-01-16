@@ -40,8 +40,9 @@ script type="text/coffeescript"
 
     # 1. Updating row of random int values
     g = new root.Swagr.UpdatingTextGraph "#updating_text", "/data/randints/arrayofsize6.json", {
-      width:      500
-      height:     120
+      width:          500
+      height:         120
+      x_per_element:  70
     }
     #g.run_updates_for(5)
     g.start_updates()
@@ -51,19 +52,22 @@ script type="text/coffeescript"
 
     class MyUpdatingTopList extends root.Swagr.UpdatingToplist
       _join_data: (data) ->
-        @svg.selectAll("text").data(data.top_list, (d, i) -> d.number)
+        # We use the id (which is actually the step number) of each position to identify it. This
+        # is needed to achieve "object constancy" in the visual transitions of the top list graph.
+        @svg.selectAll("text").data(data.top_list, (d, i) -> d.id)
 
       textmapper: (elems, data) -> (d,i) -> 
+        # Focus on distance since that is what positions are ranked on, then add other info about a position.
         (i+1).toString() + ". dist: " + d.distance.toFixed(2) + 
           " pos: (" + d.x + ", " + d.y + ")" +
-          " step: " + d.number
+          " step: " + d.id
 
     g2 = new MyUpdatingTopList "#top_list", "/data/brownian_search/search_info.json", {
       width:            500
       height:           160
-      transition_y:     100
-      update_interval:  3.0
-      transition_time:  1000
+      update_interval:  2.5
+      transition_x:     100
+      transition_time:  800
     }
     #g2.run_updates_for(20)
     g2.start_updates()
@@ -71,9 +75,9 @@ script type="text/coffeescript"
     # 3. Header for the top list, showing current number of steps.
     update_header = () ->
       d3.json("/data/brownian_search/current_position.json", (error, data) ->
-        pos_str = "(" + data[0].x + ", " + data[0].y + ")"
+        pos_str = "(" + data.x + ", " + data.y + ")"
         d3.select("#top_list_header").select("text")
-          .text("Top 5 positions at step: " + data[0].number + ", pos: " + pos_str)
+          .text("Top 5 positions at step: " + data.id + ", pos: " + pos_str)
       )
     update_header()
     setInterval(update_header, g2.opts.update_interval * 1000)

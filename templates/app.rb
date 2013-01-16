@@ -13,11 +13,6 @@ class CoffeeEngine < Sinatra::Base
     filename = params[:splat].first
     coffee filename.to_sym
   end
-
-  get "/js/*.coffee" do
-    filename = params[:splat].first
-    coffee filename.to_sym
-  end
   
 end
 
@@ -54,12 +49,12 @@ class DataEngine < Sinatra::Base
   end
 
   get '/data/brownian_search/current_position.json' do
-    json_response [BrownianSearcher.pos]
+    json_response BrownianSearcher.pos
   end
 
 end
 
-class WAppGuiServer < Sinatra::Base
+class SwagrGuiServerExample < Sinatra::Base
 
   enable :logging
   disable :dump_errors
@@ -100,5 +95,5 @@ class WAppGuiServer < Sinatra::Base
 end
 
 if __FILE__ == $0
-  WAppGuiServer.run! :port => 4000
+  SwagrGuiServerExample.run! :port => 4000
 end

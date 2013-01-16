@@ -37,7 +37,7 @@ class root.Swagr.UpdatingTextGraph extends root.Swagr.D3Graph
         .style("fill-opacity", 1e-6)
         .remove()
 
-  xmapper: (elems, data) -> (d,i) -> i * 70
+  xmapper: (elems, data) => (d,i) => i * @opts.x_per_element
 
   textmapper: (elems, data) -> (d,i) -> 
     d.value + ( if (i+1 isnt data.length) then "," else "" )

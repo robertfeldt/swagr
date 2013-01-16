@@ -1,25 +1,32 @@
 root = exports ? window
 root.Swagr = if root.Swagr then root.Swagr else {}
+
 class root.Swagr.D3Graph
   default_options =
     width:                  960
     height:                 500
-    update_interval:        1.5               # seconds
+    update_interval:        1.5               # seconds between updates
+    y_per_element:          25                # Difference per y position between consecutive elements
+    x_per_element:          25                # Difference per x position between consecutive elements
     transition_y:           50
     transition_x:           50
-    transition_time:        750               # milliseconds
+    transition_time:        750               # milliseconds in each transition
 
   constructor: (@selector, @dataUrl, opts = {}) ->
     @opts = @set_default_options_unless_given(opts, default_options)
     @_append_elements()
     @update()     # First update so we have something to show...
 
+  # Update the given options with the default options except when they have been
+  # overridden.
+  # There is probably an easier way to do this but my Coffeescript/Javascript
+  # knowledge fails me...
   set_default_options_unless_given: (givenOpts, defaultOpts) ->
     for own option, value of defaultOpts
       givenOpts[option] = value unless givenOpts.hasOwnProperty(option)
     givenOpts
 
-  # Append the svg to the top-level selector
+  # Append the svg to the top-level selector. Subclasses can add other elements as needed.
   _append_elements: () ->
     @svg = d3.select(@selector).append("svg")
                 .attr("width", @opts.width)

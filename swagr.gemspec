@@ -19,7 +19,6 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency('thor')
   gem.add_dependency('slim')
-  gem.add_dependency('sass')
   gem.add_dependency('coffee-script')
   gem.add_dependency('json')
 
