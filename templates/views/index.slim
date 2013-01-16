@@ -15,10 +15,9 @@ div class="container"
 
 /! Example B: Using d3 to add elements dynamically
 script src="js/d3.v3.min.js"
-div class="container" id="d3a"
-div class="container" id="d3b"
+div class="container" id="d3"
 script type="text/javascript"
-  | var co = d3.select("#d3a");
+  | var co = d3.select("#d3");
     co.append("p").text("Hello, d3.js world!");
 
 /! Example C: Coffee-script inline and importing from other files
@@ -44,8 +43,8 @@ script type="text/coffeescript"
       width:      500
       height:     120
     }
-    g.run_updates_for(5)
-    #g.start_updates()
+    #g.run_updates_for(5)
+    g.start_updates()
 
 
     # 2. Updating top list of positions found by BrownianSearcher
