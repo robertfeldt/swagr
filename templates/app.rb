@@ -74,6 +74,10 @@ class SwagrGuiServerExample < Sinatra::Base
     slim :index
   end
 
+  get '/about' do
+    slim :about, :layout => :layout_cm
+  end
+
   def copyright_holders
     "FIXME: Your Name(s)..."
   end

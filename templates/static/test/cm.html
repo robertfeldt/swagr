@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>CodeMirror: Lazy Mode Loading Demo</title>
+    <link rel="stylesheet" href="../js/codemirror/lib/codemirror.css">
+    <script src="../js/codemirror/lib/codemirror.js"></script>
+    <script src="../js/codemirror/lib/util/loadmode.js"></script>
+
+    <style type="text/css">
+      .CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+    </style>
+
+  </head>
+
+  <body>
+    <h1>Lets try in-browser editing</h1>
+
+    <textarea id="code" name="code">This is the editor.
+// It starts out in plain text mode,
+#  use the control below to load and apply a mode
+  "you'll see the highlighting of" this text /*change*/.
+</textarea>
+
+    <script>
+CodeMirror.modeURL = "../mode/%N/%N.js";
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+  lineNumbers: true,
+  mode: "ruby"
+});
+</script>
+  </body>
+</html>

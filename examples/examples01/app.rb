@@ -54,7 +54,7 @@ class DataEngine < Sinatra::Base
 
 end
 
-class WAppGuiServer < Sinatra::Base
+class SwagrGuiServerExample < Sinatra::Base
 
   enable :logging
   disable :dump_errors
@@ -72,6 +72,10 @@ class WAppGuiServer < Sinatra::Base
   
   get '/' do
     slim :index
+  end
+
+  get '/about' do
+    slim :about, :layout => :layout_cm
   end
 
   def copyright_holders
@@ -95,5 +99,5 @@ class WAppGuiServer < Sinatra::Base
 end
 
 if __FILE__ == $0
-  WAppGuiServer.run! :port => 4000
+  SwagrGuiServerExample.run! :port => 4000
 end

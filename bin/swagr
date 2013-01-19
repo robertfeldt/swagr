@@ -28,7 +28,22 @@ class SwagrCommand < Thor
       get "http://d3js.org/d3.v3.min.js"
       get "http://coffeescript.org/extras/coffee-script.js"
       get "http://code.jquery.com/jquery-latest.js"
+
+      # Now get the codemirror tarball, unpack it then copy just the files we want
+      get "http://codemirror.net/codemirror.zip"
+      run "unzip -o codemirror.zip"
+      FileUtils.rm_rf "codemirror" # Delete old dir so we get a fresh start
+      empty_directory "codemirror"
+      directory "codemirror-3.0/lib", "codemirror/lib"
+      directory "codemirror-3.0/keymap", "codemirror/keymap"
+      directory "codemirror-3.0/mode", "codemirror/mode"
+      directory "codemirror-3.0/theme", "codemirror/theme"
+      FileUtils.rm_rf "codemirror.zip"
+      say "Removed tarball"
+      FileUtils.rm_rf "codemirror-3.0"
+      say "Removed unpacked codemirror dir"
     end
+
   end
 
   desc "init DIR", "Create (or update) a skeleton structure in DIR for customizing a swagr app. You should carefully review and answer the question it poses if you have updated any of the standard files. If not you risk losing your changes."
