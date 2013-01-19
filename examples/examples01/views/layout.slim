@@ -2,20 +2,31 @@ doctype html
 html
   head
     meta charset="utf-8"
-    title Swagr web app template
+
     meta name="viewport" content="width=device-width, initial-scale=1.0"
     meta name="description" content=""
     meta name="author" content="FIXME: YOUR NAME"
-    link href="css/bootstrap.css" rel="stylesheet" /! media="screen"
-    link rel="stylesheet" href="css/codemirror.css"
+
+    title Swagr web app template
+
+    /! --------------------------------------------------------------
+    /! -- Files needed by Bootstrap
+    /! --------------------------------------------------------------
+    link href="css/bootstrap.css" rel="stylesheet"
+
+
+    /! --------------------------------------------------------------
+    /! -- Our own style file + custom changes inline
+    /! --------------------------------------------------------------
     link href="css/style.css" rel="stylesheet" /! media="screen"
     style
       | body {
           padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
         }
+
   body
 
-    div class="container"
+    div class="container" id="main_body_content"
       == slim :navbar
       == yield
 
@@ -25,3 +36,10 @@ html
 
     script src="js/jquery-latest.js"
     script src="js/bootstrap.min.js"
+
+    /! Ensure the active class on the main navbar is updated if one of the nav links is clicked
+    script type="text/javascript"
+      | $('#top-navbar-ul li a').on('click', function() {
+          $(this).parent().parent().find('.active').removeClass('active');
+          $(this).parent().addClass('active').css('font-weight', 'bold');
+        });

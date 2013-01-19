@@ -74,8 +74,12 @@ class SwagrGuiServerExample < Sinatra::Base
     slim :index
   end
 
+  get '/edit' do
+    slim :edit
+  end
+
   get '/about' do
-    slim :about, :layout => :layout_cm
+    slim :about
   end
 
   def copyright_holders
