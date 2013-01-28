@@ -14,6 +14,15 @@ SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
 StaticDir = PublicDir = "static"
 DefaultSubdirs = ["coffee", "views", StaticDir]
 
+def output_lines_from_running_command(command)
+  `#{command}`.split("\n")
+end
+
+def first_output_line_matching(command, regexp)
+  lines = output_lines_from_running_command command
+  lines.each {|line| return line if line =~ regexp}
+end
+
 class SwagrCommand < Thor
 
   include Thor::Actions
@@ -22,25 +31,44 @@ class SwagrCommand < Thor
     SwagrSourceRoot
   end
 
+  desc "version", "Print the current version of swagr"
+  def version
+    say "Swagr version #{Swagr::VERSION} built #{Swagr::GemBuildDate}"
+  end
+
   desc "upgrade", "Upgrade used libs by re-downloading the latest versions of needed libs. Might brake some of your code so use with caution."
   def upgrade
     inside File.join(SwagrSourceRoot, "templates", PublicDir, "js") do
       get "http://d3js.org/d3.v3.min.js"
       get "http://coffeescript.org/extras/coffee-script.js"
       get "http://code.jquery.com/jquery-latest.js"
+      get "https://raw.github.com/square/crossfilter/master/crossfilter.min.js"
 
-      # Now get the codemirror tarball, unpack it then copy just the files we want
+      # Now get the codemirror tarball and unpack it
       get "http://codemirror.net/codemirror.zip"
-      run "unzip -o codemirror.zip"
-      FileUtils.rm_rf "codemirror" # Delete old dir so we get a fresh start
-      empty_directory "codemirror"
-      directory "codemirror-3.0/lib", "codemirror/lib"
-      directory "codemirror-3.0/keymap", "codemirror/keymap"
-      directory "codemirror-3.0/mode", "codemirror/mode"
-      directory "codemirror-3.0/theme", "codemirror/theme"
+      # Find the name of the dir were files will be unpacked by "unzip -l" and parsing the lines until matches regexp
+      re = /\s*0.+(codemirror-\d+.\d+.?\d*)\//
+      line = first_output_line_matching "unzip -l codemirror.zip", re
+      if line
+        line =~ re
+        codemirror_dir = $1
+        say "Found codemirror unzipped to #{codemirror_dir}"
+  
+        run "unzip codemirror.zip"
+
+        # Now copy from unpacked codemirror dir to our template dir
+        FileUtils.rm_rf "codemirror" # Delete old dest dir so we get a fresh start
+        empty_directory "codemirror"
+        directory File.join(codemirror_dir, "lib"), "codemirror/lib"
+        directory File.join(codemirror_dir, "keymap"), "codemirror/keymap"
+        directory File.join(codemirror_dir, "mode"), "codemirror/mode"
+        directory File.join(codemirror_dir, "theme"), "codemirror/theme"
+      end
+
+      # Cleanup after codemirror download and unpack
       FileUtils.rm_rf "codemirror.zip"
       say "Removed tarball"
-      FileUtils.rm_rf "codemirror-3.0"
+      FileUtils.rm_rf codemirror_dir
       say "Removed unpacked codemirror dir"
     end
 
