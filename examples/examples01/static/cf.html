@@ -92,11 +92,11 @@ h1, h2 {
 }
 
 #hour-chart {
-  width: 200px;
+  width: 260px;
 }
 
 #delay-chart {
-  width: 200px;
+  width: 230px;
 }
 
 #distance-chart {
@@ -179,6 +179,10 @@ aside {
 </div>
 
 <footer>
+  <span style="float:right;">
+    Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
+  </span>
+  Copyright 2012 <a href="http://squareup.com">Square, Inc.</a>
 </footer>
 
 </div>
@@ -224,8 +228,8 @@ var add_data_then_render_charts_and_list = function(flights) {
   // Now add the new data to the crossfilter
   flight.add(flights);
 
-  var range_mapper = function(values, minValue, factor, func) {
-    return func([minValue, Math.floor(factor * func(values))]);
+  var range_mapper = function(valuesNew, minValue, factor, func) {
+    return func([minValue, Math.floor(factor * func(valuesNew))]);
   };
 
   var hours_new = flights.map(function(d) {return +d.origin});

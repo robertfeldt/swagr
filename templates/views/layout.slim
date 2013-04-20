@@ -38,9 +38,12 @@ html
     script src="js/jquery-latest.js"
     script src="js/bootstrap.min.js"
 
-    /! Ensure the active class on the main navbar is updated if one of the nav links is clicked
+    /! Ensure the active class on the main navbar is updated based on the current page (assumes name of page can be used to access the navbar item)
     script type="text/javascript"
-      | $('#top-navbar-ul li a').on('click', function() {
-          $(this).parent().parent().find('.active').removeClass('active');
-          $(this).parent().addClass('active').css('font-weight', 'bold');
+      | $(window).bind("load", function() {
+          var a = window.location.href.split("/");
+          var name = a[a.length - 1];
+          var id = '#top-navbar-ul-' + name;
+          $('#top-navbar-ul').find('.active').removeClass('active');
+          $(id).addClass('active').css('font-weight', 'bold');
         });

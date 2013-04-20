@@ -5,7 +5,7 @@ require 'fileutils'
 
 require 'swagr'
 
-SwagrSourceRoot = File.dirname(__FILE__).split("/")[0...-1].join("/")
+SwagrSourceRoot = File.dirname(File.expand_path(__FILE__)).split("/")[0...-1].join("/")
 
 SkeletonDir = "skeletons"
 DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
