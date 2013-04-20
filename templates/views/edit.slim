@@ -64,6 +64,7 @@ script type="text/coffeescript"
       .range(colorbrewer.RdYlGn[11])
 
     duration_ms = 1000
+    dist = 30
 
     draw_scatter_plot_from_url = (url) ->
       d3.json(url, (data) ->
@@ -92,25 +93,23 @@ script type="text/coffeescript"
 
         # Update existing circles. This must happen before the enter transition
         # below!!
-        circles
-          .attr("class", "circleupdate")
-          .transition()
-          .duration(1.5*duration_ms)
-            .attr("cx", ((d) -> xscale(d.fs[0])))
-            .attr("cy", ((d) -> yscale(d.fs[1])))
 
-        # Enter new data points as circles
+        # Enter new data points as circles. The update transition below
+        # will 
         circles.enter().append("svg:circle")
           .attr("class", "circleenter")
-          .attr("cx", ((d) -> xscale(d.fs[0])+20))
-          .attr("cy", ((d) -> yscale(d.fs[1])-20))
-          .attr("r", 5)
-          .attr("opacity", 0.0)
+          .attr("cx", ((d) -> xscale(d.fs[0])+dist))
+          .attr("cy", ((d) -> yscale(d.fs[1])-dist))
+          .attr("r", 0)
+          .attr("opacity", 1e-6)
           .attr("fill", ((d) -> colorscale(d.v)))
           .attr("stroke", "black")
+
+        circles
           .transition()
-          .duration(duration_ms)
-            .attr("opacity", 0.75)
+          .duration(1.5*duration_ms)
+            .attr("r", 5)
+            .attr("opacity", 0.80)
             .attr("cx", ((d) -> xscale(d.fs[0])))
             .attr("cy", ((d) -> yscale(d.fs[1])))
 
@@ -119,9 +118,10 @@ script type="text/coffeescript"
           .attr("class", "circleexit")
           .transition()
           .duration(duration_ms)
-          .attr("fill", "black")
-          .attr("opacity", 0)
-          .attr("transform", "translate(-20, +20)")
+          .attr("r", 0)
+          .attr("opacity", 1e-6)
+          .attr("cx", ((d) -> xscale(d.fs[0])-dist))
+          .attr("cy", ((d) -> yscale(d.fs[1])+dist))
           .remove()
       )
 
