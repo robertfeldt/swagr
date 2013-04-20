@@ -31,36 +31,19 @@ script type="text/javascript"
     });
 
 script src="js/d3.v3.min.js"
+script src="js/colorbrewer.js"
 script src="js/coffee-script.js"
 script type="text/coffeescript"
-  | w = 940
-    h = 300
+  | w = 400
+    h = 400
     pad = 20
-    left_pad = 60
+    left_pad = pad + 40
     Data_url = '/data/scatter.json'
 
     scatterplot = d3.select("#scatterplot")
       .append("svg")
       .attr("width", w)
       .attr("height", h)
-
-    x = d3.scale.linear().domain([0, 23]).range([left_pad, w-pad])
-
-    y = d3.scale.linear().domain([0, 6]).range([pad, h-pad*2])
-
-    xAxis = d3.svg.axis().scale(x).orient("bottom")
-    
-    yAxis = d3.svg.axis().scale(y).orient("left")
-
-    scatterplot.append("g")
-      .attr("class", "axis")
-      .attr("transform", "translate(0, "+(h-pad)+")")
-      .call(xAxis)
-
-    scatterplot.append("g")
-      .attr("class", "axis")
-      .attr("transform", "translate("+(left_pad-pad)+", 0)")
-      .call(yAxis)
 
     scatterplot.append("text")
       .attr("class", "infotext")
@@ -69,22 +52,44 @@ script type="text/coffeescript"
       .attr("y", (-> (h-pad-pad)/2-5))
 
     d3.json(Data_url, (data) ->
-      # Each data entry is [x,y,N] where N is number of things at that x and y
-      # Each data entry is json object with attributes x,y,fitness
-      max_r = d3.max(data, ((d) -> d.subqs[0]))
-      r = d3.scale.linear()
-            .domain([0, max_r])
-            .range([0, 12])
+      x_min = d3.min(data, ((d) -> d.fs[0]))
+      x_max = d3.max(data, ((d) -> d.fs[0]))
+      xscale = d3.scale.linear().domain([x_min, x_max]).range([left_pad, w-pad])
+
+      y_min = d3.min(data, ((d) -> d.fs[1]))
+      y_max = d3.max(data, ((d) -> d.fs[1]))
+      yscale = d3.scale.linear().domain([y_max, y_min]).range([pad, h-pad*2])
+    
+      xAxis = d3.svg.axis().scale(xscale).orient("bottom")
+      
+      yAxis = d3.svg.axis().scale(yscale).orient("left")
+  
+      scatterplot.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0, "+(h-pad)+")")
+        .call(xAxis)
+  
+      scatterplot.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate("+(left_pad-pad)+", 0)")
+        .call(yAxis)
+
+      v_max = d3.max(data, ((d) -> d.v))
+      v_min = d3.min(data, ((d) -> d.v))
+      colorscale = d3.scale.quantize() # can also try quantile()
+        .range(colorbrewer.RdYlGn[11])
+      # Better to have low value and better is green so invert scale:
+      colorscale.domain([v_max, v_min])
+
       scatterplot.selectAll(".infotext").remove();
  
       scatterplot.selectAll("circle")
         .data(data)
         .enter()
         .append("circle")
-        .attr("class", "circle")
-        .attr("cx", ((d) -> x(d.x)))
-        .attr("cy", ((d) -> y(d.y)))
-        .transition()
-        .duration(8000)
-        .attr("r", ((d) -> r(d.subqs[0])))
+        .attr("cx", ((d) -> xscale(d.fs[0])))
+        .attr("cy", ((d) -> yscale(d.fs[1])))
+        .attr("opacity", 0.80)
+        .attr("r", 6)
+        .attr("fill", ((d) -> colorscale(d.v)))
     )

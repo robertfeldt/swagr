@@ -43,6 +43,7 @@ class SwagrCommand < Thor
       get "http://coffeescript.org/extras/coffee-script.js"
       get "http://code.jquery.com/jquery-latest.js"
       get "https://raw.github.com/square/crossfilter/master/crossfilter.min.js"
+      get "https://raw.github.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.js"
 
       # Now get the codemirror tarball and unpack it
       get "http://codemirror.net/codemirror.zip"
@@ -70,6 +71,10 @@ class SwagrCommand < Thor
       say "Removed tarball"
       FileUtils.rm_rf codemirror_dir
       say "Removed unpacked codemirror dir"
+    end
+
+    inside File.join(SwagrSourceRoot, "templates", PublicDir, "css") do
+      get "https://raw.github.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.css"
     end
 
   end

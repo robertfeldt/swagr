@@ -4,6 +4,7 @@ require 'slim'
 require 'coffee-script'
 require 'json'
 require 'feldtruby'
+require 'feldtruby/array'
 
 class CoffeeEngine < Sinatra::Base
   
@@ -19,6 +20,41 @@ end
 require File.join(".", File.dirname(__FILE__), "brownian_searcher")
 BrownianSearcher = BrownianMotion2DSearch.new(5, 0.5)
 Thread.new {BrownianSearcher.start_search}
+
+# A fake fitness data generator
+class FakeFitnessData
+  def initialize(numData = 10, numFitnesses = 2, minFitness = 0.0, maxFitness = 1.0)
+    @next_id = 0
+    @num_data = numData
+    @num_fitness, @min, @max = numFitnesses, minFitness, maxFitness
+    @delta = @max - @min
+    @data = Array.new(@num_data).map {gen_new_data}
+  end
+
+  def new_fitness_value
+    @min + rand() * @delta
+  end
+
+  # Every access we randomly do some changes to the data to fake evolution...
+  def data
+    update_data
+    @data
+  end
+
+  def update_data
+    @data = @data.map do |d|
+      (rand() < 0.05) ? gen_new_data() : d
+    end
+  end
+
+  def gen_new_data
+    subqs = Array.new(@num_fitness).map {new_fitness_value}
+    qv = subqs.mean
+    {"v" => qv, "fs" => subqs, "id" => (@next_id += 1)}
+  end
+end
+
+FitnessData = FakeFitnessData.new(50,2)
 
 # The data engine should return the json or csv formatted data
 # that is used in your app. You need to set this up to dynamically deliver the
@@ -74,12 +110,7 @@ class DataEngine < Sinatra::Base
   end
 
   get "/data/scatter.json" do
-    json_response [
-      {"x" => 0, "y" => 0, "subqs" => [0.030, 0.12]},
-      {"x" => 1, "y" => 1, "subqs" => [0.050, 0.06]},
-      {"x" => 0, "y" => 1, "subqs" => [0.010, 0.12]},
-      {"x" => 1, "y" => 0, "subqs" => [0.040, 0.06]}
-    ]
+    json_response FitnessData.data
   end
 
 end

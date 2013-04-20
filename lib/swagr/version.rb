@@ -1,5 +1,5 @@
 module Swagr
-  VERSION = "0.0.12"
+  VERSION = "0.0.13"
   # Following line is automatically updated. DO NOT EDIT MANUALLY!
-  GemBuildDate = "2013-04-20 14:38.57"
+  GemBuildDate = "2013-04-20 16:29.48"
 end
