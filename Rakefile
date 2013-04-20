@@ -19,3 +19,8 @@ desc "Update build date then build and install gem"
 task :uinstall => [:update_build_date, :install] do
   # Nothing to do! Work is done by the two other tasks...
 end
+
+desc "Update build date then release the gem"
+task :urelease => [:update_build_date, :release] do
+  # Nothing to do! Work is done by the two other tasks...
+end

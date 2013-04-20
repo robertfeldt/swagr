@@ -73,6 +73,15 @@ class DataEngine < Sinatra::Base
     csv_response positions, [:date, :delay, :distance, :origin, :destination]
   end
 
+  get "/data/scatter.json" do
+    json_response [
+      {"x" => 0, "y" => 0, "subqs" => [0.030, 0.12]},
+      {"x" => 1, "y" => 1, "subqs" => [0.050, 0.06]},
+      {"x" => 0, "y" => 1, "subqs" => [0.010, 0.12]},
+      {"x" => 1, "y" => 0, "subqs" => [0.040, 0.06]}
+    ]
+  end
+
 end
 
 class SwagrGuiServerExample < Sinatra::Base

@@ -1,11 +1,12 @@
-h1 Let's try in-browser code editing
-
 /! script src="js/coffee-script.js" type="text/javascript"
 div class="container" id="code"
-  textarea id="editor" cols="50" rows="10" style="width:30%"
+  textarea id="editor" cols="50" rows="5" style="width:30%"
     | # Hello
       # This looks ok. How very nice!
       a = 1 + 2
+
+/! Container for the scatter plot
+div class="container" id="scatterplot"
 
 /! --------------------------------------------------------------
 /! -- Include files needed by CodeMirror (CM)
@@ -22,10 +23,68 @@ script src="js/codemirror/mode/ruby/ruby.js"
 /! CM themes that you use:
 link rel="stylesheet" href="js/codemirror/theme/lesser-dark.css"
 
-
 script type="text/javascript"
   | var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
       lineNumbers: true,
       mode: "ruby",
       theme: "lesser-dark"
     });
+
+script src="js/d3.v3.min.js"
+script src="js/coffee-script.js"
+script type="text/coffeescript"
+  | w = 940
+    h = 300
+    pad = 20
+    left_pad = 60
+    Data_url = '/data/scatter.json'
+
+    scatterplot = d3.select("#scatterplot")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h)
+
+    x = d3.scale.linear().domain([0, 23]).range([left_pad, w-pad])
+
+    y = d3.scale.linear().domain([0, 6]).range([pad, h-pad*2])
+
+    xAxis = d3.svg.axis().scale(x).orient("bottom")
+    
+    yAxis = d3.svg.axis().scale(y).orient("left")
+
+    scatterplot.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0, "+(h-pad)+")")
+      .call(xAxis)
+
+    scatterplot.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate("+(left_pad-pad)+", 0)")
+      .call(yAxis)
+
+    scatterplot.append("text")
+      .attr("class", "infotext")
+      .text("No search going on yet ...")
+      .attr("x", (-> (w-pad-left_pad)/2))
+      .attr("y", (-> (h-pad-pad)/2-5))
+
+    d3.json(Data_url, (data) ->
+      # Each data entry is [x,y,N] where N is number of things at that x and y
+      # Each data entry is json object with attributes x,y,fitness
+      max_r = d3.max(data, ((d) -> d.subqs[0]))
+      r = d3.scale.linear()
+            .domain([0, max_r])
+            .range([0, 12])
+      scatterplot.selectAll(".infotext").remove();
+ 
+      scatterplot.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("class", "circle")
+        .attr("cx", ((d) -> x(d.x)))
+        .attr("cy", ((d) -> y(d.y)))
+        .transition()
+        .duration(8000)
+        .attr("r", ((d) -> r(d.subqs[0])))
+    )
