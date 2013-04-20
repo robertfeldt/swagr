@@ -17,7 +17,7 @@ class CoffeeEngine < Sinatra::Base
 end
 
 require File.join(".", File.dirname(__FILE__), "brownian_searcher")
-BrownianSearcher = BrownianMotion2DSearch.new(5, 2.0)
+BrownianSearcher = BrownianMotion2DSearch.new(5, 0.5)
 Thread.new {BrownianSearcher.start_search}
 
 # The data engine should return the json or csv formatted data
@@ -31,7 +31,18 @@ class DataEngine < Sinatra::Base
     end
   end
 
-  helpers SendAsJson
+  module SendAsCSV
+    def csv_response(data, keys)
+      content_type "application/octet-stream"
+      str = keys.join(",") + "\n"
+      data.each do |entry|
+        str << (keys.map {|key| entry.send(key).to_s}.join(",") + "\n")
+      end
+      str
+    end
+  end
+
+  helpers SendAsJson, SendAsCSV
 
   # Static data files are served from the "/data" dir
   set :views,   File.dirname(__FILE__)    + '/data'
@@ -50,6 +61,16 @@ class DataEngine < Sinatra::Base
 
   get '/data/brownian_search/current_position.json' do
     json_response BrownianSearcher.pos
+  end
+
+  get %r{/data/brownian_search/all_positions_from_(\d+).json} do |fromIndex|
+    json_response BrownianSearcher.all_positions(fromIndex.to_i)
+  end
+
+  get "/data/test/all_positions_from_0.csv" do
+    positions = BrownianSearcher.all_positions(0)
+    puts "Returning csv of #{positions.length} positions"
+    csv_response positions, [:date, :delay, :distance, :origin, :destination]
   end
 
 end
@@ -76,6 +97,10 @@ class SwagrGuiServerExample < Sinatra::Base
 
   get '/edit' do
     slim :edit
+  end
+
+  get '/explore' do
+    slim :explore
   end
 
   get '/about' do

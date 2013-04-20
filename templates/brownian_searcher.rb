@@ -13,6 +13,12 @@ class BrownianMotion2DSearch
       Math.sqrt( (pos.x - self.x)**2 + (pos.y - self.y)**2 )
     end
     
+    def date; "01010540"; end # dummy for testing the crossfilter
+    def delay; 4; end # dummy for testing the crossfilter
+    def distance; distance_to(Origo); end
+    def origin; x; end
+    def destination; y; end
+
     def to_json(*a)
       {
         'x' => x,
@@ -31,6 +37,13 @@ class BrownianMotion2DSearch
     @num_steps = 0
     @pos = new_pos(0, 0)
     @top_list = [@pos]
+    @all_positions = [] # We save all positions we have visited here.
+  end
+
+  def set_new_pos(newpos)
+    # Save all positions we have visited so we can return them later
+    @all_positions << @pos
+    @pos = newpos
   end
 
   def new_pos(x, y)
@@ -52,13 +65,18 @@ class BrownianMotion2DSearch
     {"step" => @num_steps, "top_list" => @top_list}
   end
 
+  # Return all positions from a given index of visited positions. 
+  def all_positions(fromIndex = 0)
+    @all_positions[fromIndex, (@all_positions.length - fromIndex)]
+  end
+
   def rand_unit_step
     rand() < 0.495 ? -1 : 1
   end
 
   def take_brownian_step
     @num_steps += 1
-    @pos = new_pos(@pos.x + rand_unit_step(), @pos.y + rand_unit_step())
+    set_new_pos new_pos(@pos.x + rand_unit_step(), @pos.y + rand_unit_step())
   end
 
   def update_top_list
