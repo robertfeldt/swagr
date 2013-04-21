@@ -38,40 +38,65 @@ script src="coffee/updating_scatterplot.js"
 script type="text/coffeescript"
   | root = exports ? window
 
-    # Updating scatterplot with fake data (for dev)
-    #g = new root.Swagr.UpdatingScatterplot "#scatterplot2", '/data/scatter.json', {
-    #  width:            400
-    #  height:           400
-    #  transition_time:  1500
-    #  xfunc:            ((d) -> d.fs[0])
-    #  yfunc:            ((d) -> d.fs[1])
-    #  colorvaluefunc:   ((d) -> d.v)
-    #}
-    #g.start_updates()
-
-    #g = new root.Swagr.UpdatingScatterplot "#scatterplot", '/data/brownian_search/top_list.json', {
-      #width:            400
-      #height:           400
-      #transition_time:  1500
-      #xfunc:            ((d) -> d.x)
-      #yfunc:            ((d) -> d.y)
-      ## The higher the distance the better so invert it
-      #colorvaluefunc:   ((d) -> -d.distance)
-    #}
-    #g.start_updates()
-
     capitalizeFirstChar = (s) -> s.charAt(0).toUpperCase() + s.slice(1)
 
+    # This will be set to the datum which is currently being edited in the
+    # CodeMirror window, if any.
+    root.edited_datum = null
+
+    # This will be set to an array of the orig lines whenever a new datum is
+    # added to the editor window. Needed in gutter click handler if user wants
+    # to go back to orig state for a line.
+    root.orig_lines = null
+
+    # Strip leading comment char and any trailing spaces from line.
+    strip_leading_ruby_comment_marker = (line) ->
+      matched = line.match /^(\s+)#(\s+)(.+)$/
+      if matched == null
+        line
+      else
+        # We include the leading spaces and the rest of the string after the
+        # hash char and the space after it.
+        matched[1] + matched[3]
+
+    # Handler for gutter clicks. If the line is a Ruby comment, i.e. a line
+    # with leading space followed by the comment hash "#" that char and any
+    # following spaces will be stripped away. This turns the line into
+    # Ruby code. This is a simple way for the back-end to propose asserts
+    # for tests etc.
+    gutter_click_handler = (codemirror, lineNumber, gutter, clickEvent) ->
+      line = codemirror.getLine(lineNumber)
+      orig_line = root.orig_lines[lineNumber]
+      #console.log( "gutter click on line " + lineNumber + ": " + line + "\nThis line was originally: " + orig_line)
+      if line == orig_line
+        codemirror.setLine lineNumber, strip_leading_ruby_comment_marker(line)
+      else
+        codemirror.setLine lineNumber, orig_line
+
     root.editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-      lineNumbers: true,
-      mode: "ruby",
-      theme: "lesser-dark"
+      lineNumbers:  true,
+      mode:         "ruby",
+      theme:        "lesser-dark",
+      gutterClick:  gutter_click_handler
     })
+    # Does not seem to be enough to set the click handler as an option above...
+    root.editor.on("gutterClick", gutter_click_handler)
 
     # Update the text area window when user clicks on data d.
     update_text_area_on_click = (d) ->
+      root.edited_datum = d
+
       #console.log("clicked " + d.id + " from edit.slim")
-      root.editor.setValue JSON.stringify(d.candidate, null, 2)
+
+      # String to be presented:
+      str = JSON.stringify(d.candidate, null, 2)
+
+      # We add a fake line for now that can be converted to Ruby code by the gutter click handler
+      str = str + "\n  # [1].must_equal [1]"
+
+      # Save all the orig lines of the string to be presented in case we do gutter clicks later
+      root.orig_lines = str.split("\n")
+      root.editor.setValue str
 
     g = new root.Swagr.UpdatingScatterplot "#scatterplot", '/data/optimization/archive.json', {
       width:            400
