@@ -33,9 +33,10 @@ script type="text/javascript"
 script src="js/d3.v3.min.js"
 script src="js/colorbrewer.js"
 script src="js/coffee-script.js"
+script src="coffee/d3graph.js"
 script type="text/coffeescript"
-  | w = 500
-    h = 500
+  | w = 400
+    h = 400
     pad = 20
     left_pad = pad + 40
     Data_url = '/data/scatter.json'
@@ -65,25 +66,52 @@ script type="text/coffeescript"
 
     duration_ms = 1000
     dist = 30
+    opacity_value = 0.60
+    radius = 5
+    circle_stroke_width = 1.25
+
+    # A DataSource
+    class DataSource
+
+    class UpdatingScatterplot
+      default_options =
+        width:                  960
+        height:                 500
+        xpos:                   0
+        ypos:                   0
+        opacity:                0.60
+        radius:                 6
+        stroke_width:           1.25
+        transition_y:           30
+        transition_x:           30
+        transition_time:        1000              # milliseconds in each transition
+
 
     draw_scatter_plot_from_url = (url) ->
-      d3.json(url, (data) ->
-        x_min = d3.min(data, ((d) -> d.fs[0]))
-        x_max = d3.max(data, ((d) -> d.fs[0]))
+      d3.json(url, ((data) -> draw_scatter_plot_from_data(data)))
+
+    draw_scatter_plot_from_data = (data) ->
+        xfunc = (d) -> d.fs[0]
+        yfunc = (d) -> d.fs[1]
+        vfunc = (d) -> d.v
+        idfunc = (d) -> d.id
+
+        x_min = d3.min(data, xfunc)
+        x_max = d3.max(data, xfunc)
         xscale.domain([x_min, x_max])
   
-        y_min = d3.min(data, ((d) -> d.fs[1]))
-        y_max = d3.max(data, ((d) -> d.fs[1]))
+        y_min = d3.min(data, yfunc)
+        y_max = d3.max(data, yfunc)
         yscale.domain([y_max, y_min])
 
-        v_max = d3.max(data, ((d) -> d.v))
-        v_min = d3.min(data, ((d) -> d.v))
+        v_max = d3.max(data, vfunc)
+        v_min = d3.min(data, vfunc)
         # Better to have low value and better is green so invert scale:
         colorscale.domain([v_max, v_min])
   
         # Join data
         circles = scatterplot.selectAll("circle")
-          .data(data, ((d) -> d.id))
+          .data(data, idfunc)
 
         # Now update the axes since the mins and maxs might have changed on the
         # scales
@@ -91,27 +119,25 @@ script type="text/coffeescript"
         t.select(".y.axis").call(yAxis)
         t.select(".x.axis").call(xAxis)
 
-        # Update existing circles. This must happen before the enter transition
-        # below!!
-
         # Enter new data points as circles. The update transition below
         # will 
         circles.enter().append("svg:circle")
           .attr("class", "circleenter")
-          .attr("cx", ((d) -> xscale(d.fs[0])+dist))
-          .attr("cy", ((d) -> yscale(d.fs[1])-dist))
+          .attr("cx", ((d) -> xscale(xfunc(d))+dist))
+          .attr("cy", ((d) -> yscale(yfunc(d))-dist))
           .attr("r", 0)
           .attr("opacity", 1e-6)
           .attr("fill", ((d) -> colorscale(d.v)))
           .attr("stroke", "black")
+          .attr("stroke-width", circle_stroke_width)
 
         circles
           .transition()
           .duration(1.5*duration_ms)
-            .attr("r", 5)
-            .attr("opacity", 0.80)
-            .attr("cx", ((d) -> xscale(d.fs[0])))
-            .attr("cy", ((d) -> yscale(d.fs[1])))
+            .attr("r", radius)
+            .attr("opacity", opacity_value)
+            .attr("cx", ((d) -> d._xs = xscale(xfunc(d))))
+            .attr("cy", ((d) -> d._ys = yscale(yfunc(d))))
 
         # Exit circles.
         circles.exit()
@@ -120,10 +146,9 @@ script type="text/coffeescript"
           .duration(duration_ms)
           .attr("r", 0)
           .attr("opacity", 1e-6)
-          .attr("cx", ((d) -> xscale(d.fs[0])-dist))
-          .attr("cy", ((d) -> yscale(d.fs[1])+dist))
+          #.attr("cx", ((d) -> xscale(xfunc(d))-dist))
+          #.attr("cy", ((d) -> yscale(yfunc(d))+dist))
           .remove()
-      )
 
     draw_scatter_plot_from_url(Data_url)
     setInterval((-> draw_scatter_plot_from_url(Data_url)), 2.0 * 1000)

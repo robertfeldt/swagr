@@ -5,6 +5,8 @@ class root.Swagr.D3Graph
   default_options =
     width:                  960
     height:                 500
+    xpos:                   0
+    ypos:                   0
     update_interval:        1.5               # seconds between updates
     y_per_element:          25                # Difference per y position between consecutive elements
     x_per_element:          25                # Difference per x position between consecutive elements
@@ -16,6 +18,8 @@ class root.Swagr.D3Graph
     @opts = @set_default_options_unless_given(opts, default_options)
     @_append_elements()
     @update()     # First update so we have something to show...
+
+  _transform_string: -> "translate(" + @opts.xpos + "," + @opts.ypos + ")"
 
   # Update the given options with the default options except when they have been
   # overridden.

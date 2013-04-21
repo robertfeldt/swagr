@@ -18,7 +18,7 @@ class CoffeeEngine < Sinatra::Base
 end
 
 require File.join(".", File.dirname(__FILE__), "brownian_searcher")
-BrownianSearcher = BrownianMotion2DSearch.new(5, 0.5)
+BrownianSearcher = BrownianMotion2DSearch.new(10, 0.5)
 Thread.new {BrownianSearcher.start_search}
 
 # A fake fitness data generator
