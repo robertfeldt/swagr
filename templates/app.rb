@@ -167,7 +167,7 @@ class DataEngine < Sinatra::Base
 
   get "/data/optimization/archive.json" do
     a = OptimizerController.optimizer.archive
-    puts a.all_candidates.inspect
+    #puts a.all_candidates.inspect
     json_response a.all_candidates
   end
 

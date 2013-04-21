@@ -23,6 +23,7 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
     update_interval:        2.0
     datamapper:             ((d) -> d)        # Default is the identity function, i.e. data is used as is. Override for filtering etc.
     tooltipmapper:          ((d) -> "id: " + d.id)
+    clickfunc:              ((d) -> console.log("clicked " + d.id))        # Do nothing on click, just notify in console
 
   constructor: (@selector, @dataUrl, opts = {}) ->
     @opts = @set_default_options_unless_given(opts, default_options)
@@ -118,6 +119,7 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
       .on("mouseout", ((d,i) => 
         @tooltip.transition().duration(100)
           .style("opacity", 0)))
+      .on("click", ((d,i) => @opts.clickfunc(d)))
 
   _remove_exiting_elements: ->
     @elems.exit().attr("class", "circleexit")

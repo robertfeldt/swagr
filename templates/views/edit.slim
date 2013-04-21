@@ -30,13 +30,6 @@ script src="js/codemirror/mode/ruby/ruby.js"
 /! CM themes that you use:
 link rel="stylesheet" href="js/codemirror/theme/lesser-dark.css"
 
-script type="text/javascript"
-  | var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-      lineNumbers: true,
-      mode: "ruby",
-      theme: "lesser-dark"
-    });
-
 script src="js/d3.v3.min.js"
 script src="js/colorbrewer.js"
 script src="js/coffee-script.js"
@@ -69,16 +62,26 @@ script type="text/coffeescript"
 
     capitalizeFirstChar = (s) -> s.charAt(0).toUpperCase() + s.slice(1)
 
+    root.editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+      lineNumbers: true,
+      mode: "ruby",
+      theme: "lesser-dark"
+    })
+
+    # Update the text area window when user clicks on data d.
+    update_text_area_on_click = (d) ->
+      #console.log("clicked " + d.id + " from edit.slim")
+      root.editor.setValue JSON.stringify(d.candidate, null, 2)
+
     g = new root.Swagr.UpdatingScatterplot "#scatterplot", '/data/optimization/archive.json', {
-      width:            480
-      height:           400
+      width:            400
+      height:           300
       left_pad:         50
       transition_time:  1500
-      #datamapper:       ((d) -> 
-      #  data = d.generalists.quality_values
-      #  data
-      #)
-      xfunc:            ((d) -> d.subqs[0])
+      xfunc:            ((d) -> 
+        x = d.subqs[0]
+        console.log(x + " is NaN") if x == NaN
+        x)
       yfunc:            ((d) -> d.subqs[1])
       colorvaluefunc:   ((d) -> d.qv)
       # "id", "qv", "qvd", "subqs", "candidate", "pos", "type"
@@ -87,15 +90,18 @@ script type="text/coffeescript"
           s = d.type + " " + d.list_index + "."
         else
           s = d.type
-        capitalizeFirstChar(s) + d.pos + "<br/>  <strong>Q</strong> = " + d.qvd.toPrecision(5) + "%<br/>"
+        capitalizeFirstChar(s) + d.pos + "<br/>  <strong>Q</strong> = " + d.qvd.toPrecision(5) + 
+          "%<br/>  <strong>SubQs</strong> = " + d.subqs[0].toPrecision(3) + ", " + d.subqs[1].toPrecision(3)
       )
+      clickfunc:        update_text_area_on_click
     }
     g.start_updates()
 
     control_optimization = (urlEnding) ->
       url = "/data/optimization/controller/" + urlEnding + ".json"
       d3.json url, ((data, error) -> 
-        console.log data
+        console.log( "Changed mode to: " + urlEnding )
+        null
       )
 
     $("#playBtn").click(() -> control_optimization "play")
