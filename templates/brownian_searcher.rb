@@ -19,13 +19,17 @@ class BrownianMotion2DSearch
     def origin; x; end
     def destination; y; end
 
-    def to_json(*a)
+    def to_json_hash
       {
         'x' => x,
         'y' => y,
         'id' => id,
         'distance' => self.distance_to(Origo)
-      }.to_json(*a)
+      }
+    end
+
+    def to_json(*a)
+      to_json_hash.to_json(*a)
     end
   end
 

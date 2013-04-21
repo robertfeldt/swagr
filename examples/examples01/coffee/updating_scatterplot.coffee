@@ -72,6 +72,12 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
     t.select(".y.axis").call(@yAxis)
     t.select(".x.axis").call(@xAxis)
 
+  _update_existing_elements: ->
+    # Update scales and axes first to ensure things are later rendered with these
+    # new ones.
+    @_update_scales(@data)
+    @_update_axes(@data)
+
   _update_new_and_existing_elements: ->
     @elems.attr("class", "circleupdate")
       .transition().duration(@opts.transition_time)
@@ -79,10 +85,9 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
         .attr("opacity", @opts.opacity)
         .attr("cx", ((d) => @xscale(@opts.xfunc(d))))
         .attr("cy", ((d) => @yscale(@opts.yfunc(d))))
+        .attr("fill", ((d) => @colorscale(@opts.colorvaluefunc(d))))
 
   _enter_new_elements: =>
-    @_update_scales(@data)
-    @_update_axes(@data)
     @elems.enter().append("svg:circle").attr("class", "circleenter")
       .attr("cx", ((d) => @xscale(@opts.xfunc(d))+@opts.transition_x))
       .attr("cy", ((d) => @yscale(@opts.yfunc(d))-@opts.transition_y))

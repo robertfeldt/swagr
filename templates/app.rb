@@ -95,6 +95,10 @@ class DataEngine < Sinatra::Base
     json_response BrownianSearcher.search_info
   end
 
+  get '/data/brownian_search/top_list.json' do
+    json_response BrownianSearcher.search_info["top_list"]
+  end
+
   get '/data/brownian_search/current_position.json' do
     json_response BrownianSearcher.pos
   end

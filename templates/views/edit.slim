@@ -41,12 +41,24 @@ script src="coffee/updating_scatterplot.js"
 script type="text/coffeescript"
   | root = exports ? window
 
-    g = new root.Swagr.UpdatingScatterplot "#scatterplot2", '/data/scatter.json', {
+    # Updating scatterplot with fake data (for dev)
+    #g = new root.Swagr.UpdatingScatterplot "#scatterplot2", '/data/scatter.json', {
+    #  width:            400
+    #  height:           400
+    #  transition_time:  1500
+    #  xfunc:            ((d) -> d.fs[0])
+    #  yfunc:            ((d) -> d.fs[1])
+    #  colorvaluefunc:   ((d) -> d.v)
+    #}
+    #g.start_updates()
+
+    g = new root.Swagr.UpdatingScatterplot "#scatterplot", '/data/brownian_search/top_list.json', {
       width:            400
       height:           400
       transition_time:  1500
-      xfunc:            ((d) -> d.fs[0])
-      yfunc:            ((d) -> d.fs[1])
-      colorvaluefunc:   ((d) -> d.v)
+      xfunc:            ((d) -> d.x)
+      yfunc:            ((d) -> d.y)
+      # The higher the distance the better so invert it
+      colorvaluefunc:   ((d) -> -d.distance)
     }
     g.start_updates()
