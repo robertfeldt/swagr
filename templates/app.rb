@@ -26,7 +26,7 @@ class RestartableOptimizer
       begin
         while true
           if @mode == :play
-            @optimizer.optimize_num_steps(500) 
+            @optimizer.optimize_num_steps(100) 
           else
             sleep 0.10 # Sleep while pausing so we don't take all CPU...
           end
@@ -41,10 +41,13 @@ class RestartableOptimizer
     @mode = :play
     @thread.run
   end
+
   def pause
     @mode = :pause
   end
+
   def stop
+    @mode = :stop
     @thread.stop if @thread.alive?
   end
 end

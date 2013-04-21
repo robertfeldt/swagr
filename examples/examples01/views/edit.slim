@@ -1,19 +1,23 @@
-/! script src="js/coffee-script.js" type="text/javascript"
-div class="container" id="code"
-  textarea id="editor" cols="50" rows="5" style="width:30%"
-    | # Hello
-      # This looks ok. How very nice!
-      a = 1 + 2
+/! Row with editor
+div class="row-fluid"
+  div class="span1" id="editorcontrols"
+    input class="roundbutton redbutton" type="button" value="NO!" id="noBtn"
+    input class="roundbutton orangebutton" type="button" value="Skip" id="skipBtn"
+    input class="roundbutton greenbutton" type="button" value="YES!" id="yesBtn"
+  div class="span6" id="code"
+    textarea id="editor" cols="50" rows="10"
+      | # Click a bubble below to add its test code here
+  div class="span5"
   
-div class="container" id="controller"
-  input type="button" value="play" id="playBtn"
-  input type="button" value="pause" id="pauseBtn"
-
-/! Container for the scatter plot
-div class="container" id="scatterplot"
-
-/! Container for scatter plot 2
-div class="container" id="scatterplot2"
+/! Container for the search controls and charts
+div class="row"
+  div class="span1"
+    input class="roundbutton greenbutton" type="button" value="Play" id="playBtn"
+    input class="roundbutton orangebutton" type="button" value="Pause" id="pauseBtn"
+    input class="roundbutton redbutton" type="button" value="Stop" id="stopBtn"
+  div class="span11"
+    div class="container" id="scatterplot"
+    div class="container" id="scatterplot2"
 
 /! --------------------------------------------------------------
 /! -- Include files needed by CodeMirror (CM)
@@ -49,9 +53,9 @@ script type="text/coffeescript"
     # to go back to orig state for a line.
     root.orig_lines = null
 
+    # Strip leading comment char and any trailing spaces from line.
     strip_leading_ruby_comment_marker = (line) ->
       matched = line.match /^(\s+)#(\s+)(.+)$/
-      console.log matched
       if matched == null
         line
       else
@@ -77,6 +81,7 @@ script type="text/coffeescript"
       lineNumbers:  true,
       mode:         "ruby",
       theme:        "lesser-dark",
+      height:       100
       gutterClick:  gutter_click_handler
     })
     # Does not seem to be enough to set the click handler as an option above...
@@ -131,3 +136,4 @@ script type="text/coffeescript"
 
     $("#playBtn").click(() -> control_optimization "play")
     $("#pauseBtn").click(() -> control_optimization "pause")
+    $("#stopBtn").click(() -> control_optimization "stop")

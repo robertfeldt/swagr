@@ -19,11 +19,48 @@ div.tooltip {
   text-align: left;           
   width: 138px;                  
   height: 46px;                 
-  padding: 5px;             
+  padding: 5px;
   font: 12px sans-serif;        
   background: black;
   color: white;
   border: 0px;      
   border-radius: 8px;           
   pointer-events: none;         
+}
+
+input.roundbutton {
+  cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+  padding:4px 20px; /*add some padding to the inside of the button*/
+  margin: 4px;             
+  /*give the button curved corners, alter the size as required*/
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  /*give the button a drop shadow*/
+  -webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+  -moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+  box-shadow: 0 0 4px rgba(0,0,0, .75);
+  /*style the text*/
+  color:#f3f3f3;
+  font-size:1.1em;
+}
+
+input.greenbutton {
+  background:#35b128; /*the colour of the button*/
+  border:1px solid #33842a; /*required or the default border for the browser will appear*/
+}
+
+input.greybutton {
+  background:#999999; /*the colour of the button*/
+  border:1px solid #976c9b; /*required or the default border for the browser will appear*/
+}
+
+input.orangebutton {
+  background:#eea500; /*the colour of the button*/
+  border:1px solid #eb7802; /*required or the default border for the browser will appear*/
+}
+
+input.redbutton {
+  background:#dd3000; /*the colour of the button*/
+  border:1px solid #db0302; /*required or the default border for the browser will appear*/
 }
