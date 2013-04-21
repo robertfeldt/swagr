@@ -22,5 +22,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency('slim')
   gem.add_dependency('coffee-script')
   gem.add_dependency('json')
+  gem.add_dependency('feldtruby')
 
 end

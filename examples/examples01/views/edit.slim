@@ -4,6 +4,10 @@ div class="container" id="code"
     | # Hello
       # This looks ok. How very nice!
       a = 1 + 2
+  
+div class="container" id="controller"
+  input type="button" value="play" id="playBtn"
+  input type="button" value="pause" id="pauseBtn"
 
 /! Container for the scatter plot
 div class="container" id="scatterplot"
@@ -52,13 +56,47 @@ script type="text/coffeescript"
     #}
     #g.start_updates()
 
-    g = new root.Swagr.UpdatingScatterplot "#scatterplot", '/data/brownian_search/top_list.json', {
-      width:            400
+    #g = new root.Swagr.UpdatingScatterplot "#scatterplot", '/data/brownian_search/top_list.json', {
+      #width:            400
+      #height:           400
+      #transition_time:  1500
+      #xfunc:            ((d) -> d.x)
+      #yfunc:            ((d) -> d.y)
+      ## The higher the distance the better so invert it
+      #colorvaluefunc:   ((d) -> -d.distance)
+    #}
+    #g.start_updates()
+
+    capitalizeFirstChar = (s) -> s.charAt(0).toUpperCase() + s.slice(1)
+
+    g = new root.Swagr.UpdatingScatterplot "#scatterplot", '/data/optimization/archive.json', {
+      width:            480
       height:           400
+      left_pad:         50
       transition_time:  1500
-      xfunc:            ((d) -> d.x)
-      yfunc:            ((d) -> d.y)
-      # The higher the distance the better so invert it
-      colorvaluefunc:   ((d) -> -d.distance)
+      #datamapper:       ((d) -> 
+      #  data = d.generalists.quality_values
+      #  data
+      #)
+      xfunc:            ((d) -> d.subqs[0])
+      yfunc:            ((d) -> d.subqs[1])
+      colorvaluefunc:   ((d) -> d.qv)
+      # "id", "qv", "qvd", "subqs", "candidate", "pos", "type"
+      tooltipmapper:    ((d) ->
+        if d.type == "specialist"
+          s = d.type + " " + d.list_index + "."
+        else
+          s = d.type
+        capitalizeFirstChar(s) + d.pos + "<br/>  <strong>Q</strong> = " + d.qvd.toPrecision(5) + "%<br/>"
+      )
     }
     g.start_updates()
+
+    control_optimization = (urlEnding) ->
+      url = "/data/optimization/controller/" + urlEnding + ".json"
+      d3.json url, ((data, error) -> 
+        console.log data
+      )
+
+    $("#playBtn").click(() -> control_optimization "play")
+    $("#pauseBtn").click(() -> control_optimization "pause")

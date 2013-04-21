@@ -57,7 +57,7 @@ class BrownianMotion2DSearch
   def start_search
     while true
       take_brownian_step()
-      puts "Step = #{@num_steps}, at pos = #{@pos}"
+      #puts "Step = #{@num_steps}, at pos = #{@pos}"
       update_top_list()
       # Sleep so we are not searching all the time => simulate other long-running calcs...
       sleep( @max_sleep_seconds * rand() )

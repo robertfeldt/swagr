@@ -7,7 +7,7 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
     height:                 400
     xpos:                   0
     ypos:                   0
-    left_pad:               50
+    left_pad:               60
     pad:                    20
     opacity:                0.70
     radius:                 6
@@ -21,6 +21,8 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
     yfunc:                  ((d) -> d.y)
     colorvaluefunc:         ((d) -> d.v)
     update_interval:        2.0
+    datamapper:             ((d) -> d)        # Default is the identity function, i.e. data is used as is. Override for filtering etc.
+    tooltipmapper:          ((d) -> "id: " + d.id)
 
   constructor: (@selector, @dataUrl, opts = {}) ->
     @opts = @set_default_options_unless_given(opts, default_options)
@@ -33,9 +35,13 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
   _setup: ->
     @xscale = d3.scale.linear().domain([0.0, 2.0]).range([@opts.left_pad, @opts.width-@opts.pad])
     @xAxis = d3.svg.axis().scale(@xscale).orient("bottom")
+      .ticks(4)
+      .tickFormat(((d,i) -> d.toPrecision(3)))
 
     @yscale = d3.scale.linear().domain([2.0, 0.0]).range([@opts.pad, @opts.height-@opts.pad*2])
     @yAxis = d3.svg.axis().scale(@yscale).orient("left")
+      .ticks(4)
+      .tickFormat(((d,i) -> d.toPrecision(3)))
 
     @svg.append("svg:g")
       .attr("class", "x axis")
@@ -50,11 +56,18 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
     @colorscale = d3.scale.quantize()
       .range(colorbrewer.RdYlGn[11])
 
+    @tooltip = d3.select("body").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+
+    #@tooltip = d3.select("body")
+    #  .append("div")
+    #  .style("position", "absolute")
+    #  .style("z-index", "10")
+    #  .style("visibility", "hidden")
+
   _join_data: (data) -> 
-    console.log(data)
-    console.log(@svg)
     idfunc = @opts.idfunc
-    console.log(idfunc)
     @svg.selectAll("circle").data(data, ((d) -> idfunc(d)))
 
   # Scales adapt to the min and max values of the current data.
@@ -96,6 +109,15 @@ class root.Swagr.UpdatingScatterplot extends root.Swagr.D3Graph
       .attr("fill", ((d) => @colorscale(@opts.colorvaluefunc(d))))
       .attr("stroke", "black")
       .attr("stroke-width", @opts.stroke_width)
+      .on("mouseover", ((d,i) => 
+        @tooltip.transition().duration(100)
+          .style("opacity", 0.80)
+        @tooltip.html(@opts.tooltipmapper(d))
+          .style("left", (d3.event.pageX+20) + "px")
+          .style("top", (d3.event.pageY-20) + "px")))
+      .on("mouseout", ((d,i) => 
+        @tooltip.transition().duration(100)
+          .style("opacity", 0)))
 
   _remove_exiting_elements: ->
     @elems.exit().attr("class", "circleexit")

@@ -5,6 +5,54 @@ require 'coffee-script'
 require 'json'
 require 'feldtruby'
 require 'feldtruby/array'
+require 'feldtruby/optimize/differential_evolution'
+require 'feldtruby/optimize/problems/multi_objective_problems'
+require 'pp'
+
+# Run an optimizer in a thread that we can control from the outside with
+# play, stop and pause commands.
+class RestartableOptimizer
+  attr_reader :optimizer, :mode, :exception
+
+  def initialize(objective, dimensions, numStepsBeforeRestart = 1e50,
+    verbose = false, optimizer = FeldtRuby::Optimize::DEOptimizer_Rand_1_Bin)
+    @objective, @dimensions, @num_steps_before_restart = objective, dimensions, numStepsBeforeRestart
+    @optimizer = optimizer
+    @objective.dimensions = dimensions if @objective.respond_to?(:dimensions=)
+    @ss = objective.search_space
+    @optimizer = optimizer.new(@objective, @ss, {:verbose => verbose, :maxNumSteps => numStepsBeforeRestart})
+    self.pause
+    @thread = Thread.new do
+      begin
+        while true
+          if @mode == :play
+            @optimizer.optimize_num_steps(500) 
+          else
+            sleep 0.10 # Sleep while pausing so we don't take all CPU...
+          end
+        end
+      rescue Exception => e
+        @exception = e
+      end
+    end
+  end
+
+  def play
+    @mode = :play
+    @thread.run
+  end
+  def pause
+    @mode = :pause
+  end
+  def stop
+    @thread.stop if @thread.alive?
+  end
+end
+
+# Lets optimize a 5-D OmniTest objective introduced by Deb et al. 
+# Allow very many steps before the search terminates => essentially it 
+# will go on for ever. We have not yet started it though.
+OptimizerController = RestartableOptimizer.new(MinOmniTest.new, 5, 1e100)
 
 class CoffeeEngine < Sinatra::Base
   
@@ -115,6 +163,36 @@ class DataEngine < Sinatra::Base
 
   get "/data/scatter.json" do
     json_response FitnessData.data
+  end
+
+  get "/data/optimization/archive.json" do
+    a = OptimizerController.optimizer.archive
+    puts a.all_candidates.inspect
+    json_response a.all_candidates
+  end
+
+  get %r{/data/optimization/controller/(.+)\.json} do |command|
+    case command
+    when "play"
+      OptimizerController.play
+    when "pause"
+      OptimizerController.pause
+    when "stop"
+      OptimizerController.stop
+    when "status"
+      # Do nothing so we just return the current state below...
+    else
+      puts "ERROR: Don't know how to handle command #{command}"
+    end
+    # Respond with current controller mode and step of the optimizer.
+    o = OptimizerController.optimizer
+    res = {
+      "mode" => OptimizerController.mode.to_s, 
+      "step" => o.num_optimization_steps,
+      "exception" => OptimizerController.exception
+    }
+    puts res.inspect
+    json_response res
   end
 
 end

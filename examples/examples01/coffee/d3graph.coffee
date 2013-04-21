@@ -13,6 +13,7 @@ class root.Swagr.D3Graph
     transition_y:           50
     transition_x:           50
     transition_time:        750               # milliseconds in each transition
+    datamapper:             ((d) -> d)        # Default is the identity function, i.e. data is used as is. Override for filtering etc.
 
   constructor: (@selector, @dataUrl, opts = {}) ->
     @opts = @set_default_options_unless_given(opts, default_options)
@@ -69,10 +70,10 @@ class root.Swagr.D3Graph
 
   update: ->
     d3.json(@dataUrl, (error, data) =>
-      @data = data
+      @data = @opts.datamapper(data)
       # D3's general update pattern:
       # 1. DATA JOIN - Join new data with old elements, if any, then update, enter and exit below.
-      @elems = @_join_data(data)
+      @elems = @_join_data(@data)
       # 2. UPDATE - Update existing elements as needed.
       @_update_existing_elements()
       # 3. ENTER - Create new elements as needed.
