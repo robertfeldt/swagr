@@ -8,6 +8,9 @@ div class="container" id="code"
 /! Container for the scatter plot
 div class="container" id="scatterplot"
 
+/! Container for scatter plot 2
+div class="container" id="scatterplot2"
+
 /! --------------------------------------------------------------
 /! -- Include files needed by CodeMirror (CM)
 /! --------------------------------------------------------------
@@ -34,121 +37,16 @@ script src="js/d3.v3.min.js"
 script src="js/colorbrewer.js"
 script src="js/coffee-script.js"
 script src="coffee/d3graph.js"
+script src="coffee/updating_scatterplot.js"
 script type="text/coffeescript"
-  | w = 400
-    h = 400
-    pad = 20
-    left_pad = pad + 40
-    Data_url = '/data/scatter.json'
+  | root = exports ? window
 
-    scatterplot = d3.select("#scatterplot")
-      .append("svg")
-      .attr("width", w)
-      .attr("height", h)
-
-    xscale = d3.scale.linear().domain([0.0, 2.0]).range([left_pad, w-pad])
-    xAxis = d3.svg.axis().scale(xscale).orient("bottom")
-    yscale = d3.scale.linear().domain([2.0, 0.0]).range([pad, h-pad*2])
-    yAxis = d3.svg.axis().scale(yscale).orient("left")
-
-    scatterplot.append("svg:g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0, "+(h-pad)+")")
-      .call(xAxis)
-    
-    scatterplot.append("svg:g")
-      .attr("class", "y axis")
-      .attr("transform", "translate("+(left_pad-pad)+", 0)")
-      .call(yAxis)
-
-    colorscale = d3.scale.quantize() # can also try quantile()
-      .range(colorbrewer.RdYlGn[11])
-
-    duration_ms = 1000
-    dist = 30
-    opacity_value = 0.60
-    radius = 5
-    circle_stroke_width = 1.25
-
-    # A DataSource
-    class DataSource
-
-    class UpdatingScatterplot
-      default_options =
-        width:                  960
-        height:                 500
-        xpos:                   0
-        ypos:                   0
-        opacity:                0.60
-        radius:                 6
-        stroke_width:           1.25
-        transition_y:           30
-        transition_x:           30
-        transition_time:        1000              # milliseconds in each transition
-
-
-    draw_scatter_plot_from_url = (url) ->
-      d3.json(url, ((data) -> draw_scatter_plot_from_data(data)))
-
-    draw_scatter_plot_from_data = (data) ->
-        xfunc = (d) -> d.fs[0]
-        yfunc = (d) -> d.fs[1]
-        vfunc = (d) -> d.v
-        idfunc = (d) -> d.id
-
-        x_min = d3.min(data, xfunc)
-        x_max = d3.max(data, xfunc)
-        xscale.domain([x_min, x_max])
-  
-        y_min = d3.min(data, yfunc)
-        y_max = d3.max(data, yfunc)
-        yscale.domain([y_max, y_min])
-
-        v_max = d3.max(data, vfunc)
-        v_min = d3.min(data, vfunc)
-        # Better to have low value and better is green so invert scale:
-        colorscale.domain([v_max, v_min])
-  
-        # Join data
-        circles = scatterplot.selectAll("circle")
-          .data(data, idfunc)
-
-        # Now update the axes since the mins and maxs might have changed on the
-        # scales
-        t = scatterplot.transition().duration(1.5*duration_ms)
-        t.select(".y.axis").call(yAxis)
-        t.select(".x.axis").call(xAxis)
-
-        # Enter new data points as circles. The update transition below
-        # will 
-        circles.enter().append("svg:circle")
-          .attr("class", "circleenter")
-          .attr("cx", ((d) -> xscale(xfunc(d))+dist))
-          .attr("cy", ((d) -> yscale(yfunc(d))-dist))
-          .attr("r", 0)
-          .attr("opacity", 1e-6)
-          .attr("fill", ((d) -> colorscale(d.v)))
-          .attr("stroke", "black")
-          .attr("stroke-width", circle_stroke_width)
-
-        circles
-          .transition()
-          .duration(1.5*duration_ms)
-            .attr("r", radius)
-            .attr("opacity", opacity_value)
-            .attr("cx", ((d) -> d._xs = xscale(xfunc(d))))
-            .attr("cy", ((d) -> d._ys = yscale(yfunc(d))))
-
-        # Exit circles.
-        circles.exit()
-          .attr("class", "circleexit")
-          .transition()
-          .duration(duration_ms)
-          .attr("r", 0)
-          .attr("opacity", 1e-6)
-          #.attr("cx", ((d) -> xscale(xfunc(d))-dist))
-          #.attr("cy", ((d) -> yscale(yfunc(d))+dist))
-          .remove()
-
-    draw_scatter_plot_from_url(Data_url)
-    setInterval((-> draw_scatter_plot_from_url(Data_url)), 2.0 * 1000)
+    g = new root.Swagr.UpdatingScatterplot "#scatterplot2", '/data/scatter.json', {
+      width:            400
+      height:           400
+      transition_time:  1500
+      xfunc:            ((d) -> d.fs[0])
+      yfunc:            ((d) -> d.fs[1])
+      colorvaluefunc:   ((d) -> d.v)
+    }
+    g.start_updates()

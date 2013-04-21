@@ -17,9 +17,13 @@ class root.Swagr.D3Graph
   constructor: (@selector, @dataUrl, opts = {}) ->
     @opts = @set_default_options_unless_given(opts, default_options)
     @_append_elements()
+    @_setup()
     @update()     # First update so we have something to show...
 
   _transform_string: -> "translate(" + @opts.xpos + "," + @opts.ypos + ")"
+
+  _setup: ->
+    # Do nothing for now but subclasses can override
 
   # Update the given options with the default options except when they have been
   # overridden.
@@ -40,7 +44,8 @@ class root.Swagr.D3Graph
 
   # Start updating the graph
   start_updates: ->
-    @interval_id = root.setInterval ( => @update() ), @opts.update_interval*1000
+    delay = @opts.update_interval*1000
+    @interval_id = root.setInterval( (() => @update() ), delay )
 
   # Stop updating the graph
   stop_updates: -> root.clearInterval(@interval_id)
@@ -49,6 +54,18 @@ class root.Swagr.D3Graph
   run_updates_for: (seconds) ->
     @start_updates()
     setTimeout ( => @stop_updates(); console.log("Stopped updating graph!"); ), seconds*1000
+
+  _update_new_and_existing_elements: ->
+    # Do nothing
+
+  _update_existing_elements: ->
+    # Do nothing
+
+  _enter_new_elements: ->
+    # Do nothing
+
+  _remove_exiting_elements: ->
+    # Do nothing
 
   update: ->
     d3.json(@dataUrl, (error, data) =>
@@ -60,6 +77,8 @@ class root.Swagr.D3Graph
       @_update_existing_elements()
       # 3. ENTER - Create new elements as needed.
       @_enter_new_elements()
-      # 4. EXIT - Remove old elements as needed.
+      # 4. UPDATE+ENTER - Operate on both the existing and new.
+      @_update_new_and_existing_elements()      
+      # 5. EXIT - Remove old elements as needed.
       @_remove_exiting_elements()
     )
