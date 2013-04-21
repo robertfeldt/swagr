@@ -220,12 +220,24 @@ class SwagrGuiServerExample < Sinatra::Base
     slim :index
   end
 
-  get '/edit' do
-    slim :edit
+  get '/src' do
+    slim :src
   end
 
-  get '/explore' do
-    slim :explore
+  get '/test' do
+    slim :src
+  end
+
+  get '/search' do
+    slim :search
+  end
+
+  get '/traits' do
+    slim :traits
+  end
+
+  get '/generators' do
+    slim :generators
   end
 
   get '/about' do
