@@ -1,8 +1,9 @@
 /! Row with editor
 div class="row-fluid"
-  div class="span8" id="code"
-    textarea id="editor" cols="50" rows="10"
-      | # Click a bubble below to add its test code here
+  div class="span8" id="testcode"
+    textarea id="testeditor" cols="50" rows="10"
+      | # No tests yet...
+
   div class="span4"
   
 /! Container for the search controls and charts
@@ -33,9 +34,11 @@ script src="coffee/updating_scatterplot.js"
 script type="text/coffeescript"
   | root = exports ? window
 
-    root.editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+    root.testeditor = CodeMirror.fromTextArea(document.getElementById("testeditor"), {
       lineNumbers:  true,
       mode:         "ruby",
       theme:        "lesser-dark",
       height:       100
     })
+    root.testeditor.setSize(600, 400)
+    root.testeditor.refresh()

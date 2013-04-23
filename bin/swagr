@@ -23,6 +23,9 @@ def first_output_line_matching(command, regexp)
   lines.each {|line| return line if line =~ regexp}
 end
 
+def create_dir(dir)
+end
+
 class SwagrCommand < Thor
 
   include Thor::Actions
@@ -87,6 +90,20 @@ class SwagrCommand < Thor
     end
     # Now copy everything in the templates dir into the 
     directory "templates", dir
+  end
+
+  desc "serve DIR", "Run a swagr app from DIR (will first copy the template files and then copy the files in DIR and then run. Ensures any files changed in DIR are the ones being executed."
+  def serve(dir)
+    tdir = File.join(dir, ".temp")
+    invoke :create, [tdir]
+    local_changes = File.join(dir, "local_changes")
+    directory local_changes, tdir
+    app = File.join(tdir, "app.rb")
+    begin
+      system "ruby #{app}"
+    ensure
+      FileUtils.rm_rf tdir
+    end
   end
 
   desc "create DIR", "Create/setup a swagr app in DIR"

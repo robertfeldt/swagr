@@ -1,8 +1,25 @@
 /! Row with editor
 div class="row-fluid"
-  div class="span8" id="code"
-    textarea id="editor" cols="50" rows="10"
-      | # Here you can write code...
+  div class="span8" id="srccode"
+    textarea id="srceditor" cols="50" rows="10"
+      | class Stack
+          def initialize
+            @s = []
+          end
+        
+          def push(item)
+            @s.push item
+          end
+        
+          def pop
+            @s.pop
+          end
+        
+          def count
+            @s.length
+          end
+        end
+
   div class="span4"
   
 /! Container for the search controls and charts
@@ -33,9 +50,11 @@ script src="coffee/updating_scatterplot.js"
 script type="text/coffeescript"
   | root = exports ? window
 
-    root.editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+    root.srceditor = CodeMirror.fromTextArea(document.getElementById("srceditor"), {
       lineNumbers:  true,
       mode:         "ruby",
       theme:        "lesser-dark",
       height:       100
     })
+    root.srceditor.setSize(600, 400)
+    root.srceditor.refresh()
