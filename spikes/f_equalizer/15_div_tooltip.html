@@ -1,0 +1,180 @@
+<!-- http://bl.ocks.org/mbostock/1557377 -->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: An HTML div tooltip</title>
+		<script type="text/javascript" src="./d3.v3.js"></script>
+		<style type="text/css">
+
+			rect:hover {
+				fill: orange;
+			}
+			
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 14px;
+				line-height: 18px;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div id="tooltip" class="hidden">
+			<p><strong>Important Label Heading</strong></p>
+			<p><span id="value">100</span>%</p>
+		</div>
+		<script type="text/javascript">
+
+			//Width and height
+			var w = 600;
+			var h = 500;
+			
+			var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+							11, 12, 45, 20, 68, 17, 16, 18, 23, 25 ];
+
+			var yScale = d3.scale.ordinal()
+							.domain(d3.range(dataset.length))
+							.rangeRoundBands([0, h], 0.05);
+
+			var xScale = d3.scale.linear()
+							.domain([0, 100+5])
+							.range([0, w]);
+			
+			//Create SVG element
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+			var drag = d3.behavior.drag()
+    		.origin(Object)
+    		.on("drag", dragmove);
+
+			var dragmove = function(d) {
+  			d3.select(this)
+      		.attr("cx", d.x = Math.max(radius, Math.min(width - radius, xScale.invert(d3.event.x))))
+      		.attr("cy", d.y = Math.max(radius, Math.min(height - radius, yScale.invert(d3.event.y)));
+			};
+
+			//Create bars
+			var bars = function() {
+				svg.selectAll("rect")
+				   .data(dataset)
+				   .enter()
+				   .append("rect")
+				   .attr("x", 0)
+				   .attr("y", function(d, i) {
+				   		return h - yScale(i);
+				   })
+				   .attr("width", function(d) { return xScale(d); })
+				   .attr("height", yScale.rangeBand())
+				   .attr("rx", 4)
+				   .attr("ry", 4)
+				   .attr("fill", function(d) {
+						return "rgb(0, 0, " + (d * 10) + ")";
+				   })
+				   .on("mouseover", function(d) {
+	
+						//Get this bar's x/y values, then augment for the tooltip
+						var xPosition = parseFloat(d3.select(this).attr("x")) + w / 2;
+						var yPosition = parseFloat(d3.select(this).attr("y")) / 2 + yScale.rangeBand() / 2;
+	
+						//Update the tooltip position and value
+						d3.select("#tooltip")
+							.style("left", xPosition + "px")
+							.style("top", yPosition + "px")						
+							.select("#value")
+							.text(d);
+			   	
+						//Show the tooltip
+						d3.select("#tooltip").classed("hidden", false);
+	
+				   })
+				   .on("mouseout", function() {
+			   	
+						//Hide the tooltip
+						d3.select("#tooltip").classed("hidden", true);
+						
+				   })
+				   .on("click", function() {
+				   		sortBars();
+				   });
+			};
+
+			bars();
+	
+			var circles = function() {
+				// Create circles to grab onto
+				svg.selectAll("circle")
+				  .data(dataset)
+				  .enter()
+				  .append("circle")
+				  .attr("cx", function(d) { return xScale(d); })
+				  .attr("cy", function(d, i) {
+				   	return h - yScale(i) + yScale.rangeBand() / 2;
+				  })
+				  .attr("r", yScale.rangeBand() / 3.5)
+				  .attr("fill", function(d) {
+						return "rgb(0, 0, " + (d * 10) + ")";
+				  })
+				  .attr("stroke", "#bbb")
+				  .attr("stroke-width", "1.25px")
+				  .attr("opacity", 0.8)
+				  .call(drag)
+			};
+
+			circles();
+	
+				//Define sort order flag
+				var sortOrder = false;
+				
+				//Define sort function
+				var sortBars = function() {
+	
+					//Flip value of sortOrder
+				   	sortOrder = !sortOrder;
+	
+					svg.selectAll("rect")
+					   .sort(function(a, b) {
+					   		if (sortOrder) {
+						   		return d3.ascending(a, b);
+					   		} else {
+						   		return d3.descending(a, b);
+					   		}
+					   	})
+					   .transition()
+					   .delay(function(d, i) {
+						   return i * 30;
+					   })
+					   .duration(750)
+					   .attr("y", function(d, i) {
+					   		return yScale(i);
+					   });
+	
+				};			
+			
+		</script>
+	</body>
+</html>
