@@ -1,0 +1,58 @@
+doctype html
+html
+  head
+    meta charset="utf-8"
+
+    meta name="viewport" content="width=device-width, initial-scale=1.0"
+    meta name="description" content=""
+    meta name="author" content="FIXME: YOUR NAME"
+
+    title Swagr web app template
+
+    title = @page_title
+
+    /! - if @web_socket_handler
+    /!  script{:type => "text/javascript", :src  => "js/#{@web_socket_handler}.js"}
+
+    /! --------------------------------------------------------------
+    /! -- Files needed by Bootstrap
+    /! --------------------------------------------------------------
+    link href="css/bootstrap.css" rel="stylesheet"
+
+    /! --------------------------------------------------------------
+    /! -- Nice color definitions used in d3 visualisations
+    /! --------------------------------------------------------------
+    link href="css/colorbrewer.css" rel="stylesheet"
+
+    /! --------------------------------------------------------------
+    /! -- Our own style file + custom changes inline
+    /! --------------------------------------------------------------
+    link href="css/style.css" rel="stylesheet"
+    link href="css/scatterplot.css" rel="stylesheet"
+    style
+      | body {
+          padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        }
+
+  body
+
+    div class="container" id="main_body_content"
+      == slim :navbar
+      == yield
+
+    div class="container"
+      div id="footer"
+        == slim :footer
+
+    script src="js/jquery-latest.js"
+    script src="js/bootstrap.min.js"
+
+    /! Ensure the active class on the main navbar is updated based on the current page (assumes name of page can be used to access the navbar item)
+    script type="text/javascript"
+      | $(window).bind("load", function() {
+          var a = window.location.href.split("/");
+          var name = a[a.length - 1];
+          var id = '#top-navbar-ul-' + name;
+          $('#top-navbar-ul').find('.active').removeClass('active');
+          $(id).addClass('active').css('font-weight', 'bold');
+        });

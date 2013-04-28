@@ -11,8 +11,9 @@ SkeletonDir = "skeletons"
 DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
 SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
 
-StaticDir = PublicDir = "static"
-DefaultSubdirs = ["coffee", "views", StaticDir]
+StaticDir = PublicDir = "public"
+DefaultSubdirs = ["views", StaticDir, "config", "log", "tmp", 
+  File.join(StaticDir, "js"), File.join(StaticDir, "css"), File.join(StaticDir, "coffee")]
 
 def output_lines_from_running_command(command)
   `#{command}`.split("\n")
@@ -21,9 +22,6 @@ end
 def first_output_line_matching(command, regexp)
   lines = output_lines_from_running_command command
   lines.each {|line| return line if line =~ regexp}
-end
-
-def create_dir(dir)
 end
 
 class SwagrCommand < Thor
@@ -41,7 +39,10 @@ class SwagrCommand < Thor
 
   desc "upgrade", "Upgrade used libs by re-downloading the latest versions of needed libs. Might brake some of your code so use with caution."
   def upgrade
-    inside File.join(SwagrSourceRoot, "templates", PublicDir, "js") do
+
+    target_dir = File.join(SwagrSourceRoot, "external_libs", PublicDir)
+
+    inside File.join(target_dir, "js") do
       get "http://d3js.org/d3.v3.min.js"
       get "http://coffeescript.org/extras/coffee-script.js"
       get "http://code.jquery.com/jquery-latest.js"
@@ -76,7 +77,7 @@ class SwagrCommand < Thor
       say "Removed unpacked codemirror dir"
     end
 
-    inside File.join(SwagrSourceRoot, "templates", PublicDir, "css") do
+    inside File.join(target_dir, "css") do
       get "https://raw.github.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.css"
     end
 
@@ -84,39 +85,61 @@ class SwagrCommand < Thor
 
   desc "init DIR", "Create (or update) a skeleton structure in DIR for customizing a swagr app. You should carefully review and answer the question it poses if you have updated any of the standard files. If not you risk losing your changes."
   def init(dir)
+
     empty_directory dir
+
     inside dir do
       DefaultSubdirs.each {|subdir| empty_directory(subdir)}
     end
-    # Now copy everything in the templates dir into the 
-    directory "templates", dir
+
+    # First copy the external libs.
+    directory "external_libs", dir
+
+    # Now copy the site_template into the dir.
+    directory "site_template", dir
+
   end
 
   desc "serve DIR", "Run a swagr app from DIR (will first copy the template files and then copy the files in DIR and then run. Ensures any files changed in DIR are the ones being executed."
+  method_option :delete, :type => :boolean, :default => false, :desc => "Delete the temp site after serving it"
   def serve(dir)
-    tdir = File.join(dir, ".temp")
+
+    # We serve it from a new copy of the dir
+    tdir = File.join(".", "tmp", dir)
+
+    # First create a fresh swagr site
     invoke :create, [tdir]
-    local_changes = File.join(dir, "local_changes")
-    directory local_changes, tdir
-    app = File.join(tdir, "app.rb")
-    begin
-      system "ruby #{app}"
-    ensure
-      FileUtils.rm_rf tdir
+
+    # Copy any files in the dir to serve
+    directory dir, tdir
+
+    # Now start a thin server in the dir
+    inside tdir do
+      begin
+        system "thin start -R config.ru"
+      ensure
+        FileUtils.rm_rf tdir if options[:delete]
+      end
     end
   end
 
   desc "create DIR", "Create/setup a swagr app in DIR"
   def create(dir)
+
     init(dir)
+
     public_dir = File.join(dir, PublicDir)
+
     tarball = File.join(public_dir, "skeleton.zip")
+
     copy_file SkeletonTarball, tarball
+
     inside public_dir do
-      run "unzip skeleton.zip"
+      run "unzip -o skeleton.zip"
       FileUtils.rm_rf "skeleton.zip"
       say "Removed tarball"
     end
+
   end
 
 end

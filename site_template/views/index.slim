@@ -1,0 +1,83 @@
+h1 Hello, Swagr world!
+
+/! Example A: Some static svg
+div class="container"
+  svg width="400" height="50"
+    text x="0" y="35" font-family="Helvetica" font-size="20" SVG:
+    circle cx="175" cy="25" r="20" fill="rgba(128, 0, 128, 1.0)"
+    circle cx="200" cy="25" r="20" fill="rgba(0, 0, 255, 0.75)"
+    circle cx="225" cy="25" r="20" fill="rgba(0, 255, 0, 0.5)"
+    circle cx="250" cy="25" r="20" fill="rgba(255, 255, 0, 0.25)"
+    circle cx="275" cy="25" r="20" fill="rgba(255, 0, 0, 0.1)"
+    /! rect x="100" y="100" width="100" height="50"
+    /! ellipse cx="150" cy="80" rx="50" ry="25" fill="red"
+    /! line x1="0" y1="0" x2="300" y2="50" stroke="black"
+
+/! Example B: Using d3 to add elements dynamically
+script src="js/d3.v3.min.js"
+div class="container" id="d3"
+script type="text/javascript"
+  | var co = d3.select("#d3");
+    co.append("p").text("Hello, d3.js world!");
+
+/! Example C: Coffee-script inline and importing from other files
+script src="js/coffee-script.js"
+script src="coffee/d3graph.js"
+script src="coffee/updating_text_graph.js"
+script src="coffee/updating_top_list.js"
+div class="container" id="d3_from_coffeescript"
+div class="container" id="updating_text"
+div class="container" id="top_list_header"
+  text class="update"
+div class="container" id="top_list"
+script type="text/coffeescript"
+  | a = 1.5
+    b = 2 + a
+    str = "Hello, coffee-script and d3.js world! b = " + b + ". And now an updating text graph from Coffee-script..."
+    console.log(str)    
+    d3.select("#d3_from_coffeescript").append("span").text(str)
+    root = exports ? window
+
+    # 1. Updating row of random int values
+    g = new root.Swagr.UpdatingTextGraph "#updating_text", "/data/randints/arrayofsize6.json", {
+      width:          500
+      height:         120
+      x_per_element:  70
+    }
+    #g.run_updates_for(5)
+    g.start_updates()
+
+
+    # 2. Updating top list of positions found by BrownianSearcher
+
+    class MyUpdatingTopList extends root.Swagr.UpdatingToplist
+      _join_data: (data) ->
+        # We use the id (which is actually the step number) of each position to identify it. This
+        # is needed to achieve "object constancy" in the visual transitions of the top list graph.
+        @svg.selectAll("text").data(data.top_list, (d, i) -> d.id)
+
+      textmapper: (elems, data) -> (d,i) -> 
+        # Focus on distance since that is what positions are ranked on, then add other info about a position.
+        (i+1).toString() + ". dist: " + d.distance.toFixed(2) + 
+          " pos: (" + d.x + ", " + d.y + ")" +
+          " step: " + d.id
+
+    g2 = new MyUpdatingTopList "#top_list", "/data/brownian_search/search_info.json", {
+      width:            500
+      height:           160
+      update_interval:  2.5
+      transition_x:     100
+      transition_time:  800
+    }
+    #g2.run_updates_for(20)
+    g2.start_updates()
+
+    # 3. Header for the top list, showing current number of steps.
+    update_header = () ->
+      d3.json("/data/brownian_search/current_position.json", (error, data) ->
+        pos_str = "(" + data.x + ", " + data.y + ")"
+        d3.select("#top_list_header").select("text")
+          .text("Top 5 positions at step: " + data.id + ", pos: " + pos_str)
+      )
+    update_header()
+    setInterval(update_header, g2.opts.update_interval * 1000)
