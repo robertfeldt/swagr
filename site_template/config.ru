@@ -22,7 +22,7 @@ class WebSocketApp < Rack::WebSocket::Application
 		puts "Client Connected"
 
 		# Send a welcome message to the user over websockets.
-		send_data "<span class='server'> @client Hello Client! </span>"
+		send_data "@client Hello Client!"
 		puts "Sent message: @client Hello Client!"
 
                 # Uncomment below for an example of routinely broadcasting to the client.
@@ -42,7 +42,7 @@ class WebSocketApp < Rack::WebSocket::Application
 	def on_message(env, message)
 		puts "Received message: #{message}"
 
-		send_data "<span class='server'> @client I received your message: #{message} </span>"
+		send_data "@client I received your message: #{message}"
 	end
 
 	def on_error(env, error)
@@ -58,8 +58,8 @@ class SinatraApp < Sinatra::Application
 end
 
 # Set service point for the websockets. This way we can run both web sockets and sinatra on the same server and port number.
-map '/example' do
-	run WebSocketApp.new(:socket_mount_point => '/example')
+map '/websocket' do
+	run WebSocketApp.new(:socket_mount_point => '/websocket')
 end
 
 # This delegates everything other route not defined above to the Sinatra app.
