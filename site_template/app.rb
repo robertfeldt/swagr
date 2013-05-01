@@ -23,13 +23,11 @@ end
 
 SiteName = "Swagr"
 
-get "/coffee/*.js" do
-
-	filename = params[:splat].first
-
-	coffee "public/coffee/#{filename}".to_sym
-
-end
+# We no longer need to compile the coffeescript files on the fly; it is done when setting up the site.
+#get "/coffee/*.js" do
+#	filename = params[:splat].first
+#	coffee "/public/coffee/#{filename}".to_sym
+#end
 
 get '/' do
 

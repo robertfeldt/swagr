@@ -2,6 +2,7 @@
 require 'rubygems'
 require 'thor'
 require 'fileutils'
+require 'coffee-script'
 
 require 'swagr'
 
@@ -12,8 +13,12 @@ DefaultSkeletonTarball = "bootstrap_default_130109_0842.zip"
 SkeletonTarball = File.join(SkeletonDir, DefaultSkeletonTarball)
 
 StaticDir = PublicDir = "public"
+JsDir = File.join(StaticDir, "js")
+CoffeescriptDir = File.join(JsDir, "coffee")
+CoffeescriptSrcDir = File.join(SwagrSourceRoot, "site_template", "public", "coffee")
+CoffeescriptDirAbsolute = File.join(SwagrSourceRoot, "site_template", CoffeescriptDir)
 DefaultSubdirs = ["views", StaticDir, "config", "log", "tmp", 
-  File.join(StaticDir, "js"), File.join(StaticDir, "css"), File.join(StaticDir, "coffee")]
+  JsDir, File.join(StaticDir, "css"), CoffeescriptDir]
 
 def output_lines_from_running_command(command)
   `#{command}`.split("\n")
@@ -83,8 +88,22 @@ class SwagrCommand < Thor
 
   end
 
+  desc "compile", "Compile coffeescript files to javascript"
+  def compile
+    Dir.foreach(CoffeescriptSrcDir) do |cf|
+      unless cf == '.' || cf == '..'
+        js = CoffeeScript.compile File.read( File.join(CoffeescriptSrcDir, cf) )
+        dest_file = File.join CoffeescriptDirAbsolute, cf.gsub(/\.coffee$/, '.js')
+        File.open(dest_file, 'w') {|fh| fh.puts(js)}
+      end
+    end
+  end
+
   desc "init DIR", "Create (or update) a skeleton structure in DIR for customizing a swagr app. You should carefully review and answer the question it poses if you have updated any of the standard files. If not you risk losing your changes."
   def init(dir)
+
+    # Compile all coffeescript files into js
+    invoke :compile, []
 
     empty_directory dir
 
