@@ -53,6 +53,7 @@ class SwagrCommand < Thor
       get "http://code.jquery.com/jquery-latest.js"
       get "https://raw.github.com/square/crossfilter/master/crossfilter.min.js"
       get "https://raw.github.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.js"
+      get "https://raw.github.com/misoproject/d3.chart/master/d3.chart.js"
 
       # Now get the codemirror tarball and unpack it
       get "http://codemirror.net/codemirror.zip"
@@ -92,6 +93,7 @@ class SwagrCommand < Thor
   def compile
     Dir.foreach(CoffeescriptSrcDir) do |cf|
       unless cf == '.' || cf == '..'
+        puts "compiling #{cf}"
         js = CoffeeScript.compile File.read( File.join(CoffeescriptSrcDir, cf) )
         dest_file = File.join CoffeescriptDirAbsolute, cf.gsub(/\.coffee$/, '.js')
         File.open(dest_file, 'w') {|fh| fh.puts(js)}
