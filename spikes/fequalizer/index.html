@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.axis text {
+  font: 11px sans-serif;
+}
+
+.axis path {
+  display: none;
+}
+
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.grid-background {
+  fill: #ddd;
+}
+
+.grid line,
+.grid path {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.grid .minor.tick line {
+  stroke-opacity: .5;
+}
+
+.brush .extent {
+  stroke: #000;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var data = [
+  {"name": "Max Delta", "value": 20},
+  {"name": "Input Distance", "value": 80}
+];
+
+var margin = {top: 200, right: 40, bottom: 200, left: 40},
+    width = 500 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.linear()
+    .domain([0, 100])
+    .range([0, width]);
+
+// The current bar/objective being brushed will be saved here
+var brushCell;
+
+// Clear the previously-active brush, if any.
+function brushstart(p) {
+  if (brushCell !== this) {
+    d3.select(brushCell).call(brush.clear());
+    brushCell = this;
+  }
+}
+
+var brush = d3.svg.brush()
+  .x(x)
+  .extent([0, objective.value])
+  .on("brushstart", brushstart)
+  .on("brush", brushed);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.append("rect")
+    .attr("class", "grid-background")
+    .attr("width", width)
+    .attr("height", height);
+
+svg.append("g")
+    .attr("class", "x grid")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+        .ticks(10, 10)
+        .tickSize(-height)
+        .tickFormat(""))
+  .selectAll(".tick")
+    .classed("minor", function(d) { return d; });
+
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.svg.axis()
+      .scale(x)
+      .orient("bottom")
+      .ticks(10)
+      .tickPadding(0))
+  .selectAll("text")
+    .attr("x", 6)
+    .style("text-anchor", null);
+
+var gBrush = svg.append("g")
+    .attr("class", "brush")
+    .call(brush);
+
+gBrush.selectAll("rect")
+    .attr("height", height);
+
+function brushed() {
+  var extent0 = this.extent(),
+      extent1;
+
+  var roundfunc = function(v) {return(10 * Math.round(v / 10.0));};
+
+    // if dragging, preserve the width of the extent
+  if (d3.event.mode === "move") {
+    extent1 = extent0;
+  }
+  // otherwise, if resizing, round both dates
+  else {
+    extent1 = extent0.map(roundfunc);
+    console.log(extent0);
+    console.log(extent1);
+
+    // if empty when rounded, use floor & ceil instead
+    if (extent1[0] >= extent1[1]) {
+      extent1[0] = 10 * Math.floor(extent0[0]/10.0);
+      extent1[1] = 10 * Math.ceil(extent0[1]/10.0);
+    }
+  }
+
+  d3.select(this).call(this.extent(extent1));
+}
+
+</script>
+August 14, 2013
